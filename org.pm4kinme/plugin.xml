@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin>
+
+   <!-- This is an example for providing an own category 
+      <extension
+         point="org.knime.workbench.repository.categories">
+      <category
+            description="Category containing my nodes"
+            icon="icons/default.png"
+            level-id="myNodes"
+            name="My nodes"
+            path="/"/>
+   </extension>
+   -->
+   
+   <extension
+         point="org.knime.workbench.repository.nodes">
+      <node
+            category-path="/"
+            factory-class="org.pm4kinme.node.example.MyExampleNodeNodeFactory"
+            id="org.knime.example.node.MyExampleNodeNodeFactory"/>
+      <node
+            category-path="/"
+            factory-class="org.pm4kinme.node.io.read.XLogReaderNodeFactory"
+            id="org.pm4kinme.node.io.read.XLogReaderNodeFactory"/>
+    </extension>
+    <extension
+          point="org.knime.core.PortType">
+       <portType
+             hidden="false"
+             name="Event Log"
+             objectClass="org.pm4kinme.portobject.XLogPortObject"
+             objectSerializer="org.pm4kinme.portobject.XLogPortObject$XLogPortObjectSerializer"
+             specClass="org.pm4kinme.portobject.XLogPortObjectSpec"
+             specSerializer="org.pm4kinme.portobject.XLogPortObjectSpec$XLogPortObjectSpecSerializer">
+       </portType>
+    </extension>
+</plugin>

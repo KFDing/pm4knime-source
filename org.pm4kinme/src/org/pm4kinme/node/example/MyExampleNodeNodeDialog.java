@@ -1,4 +1,4 @@
-package org.knime.example.node;
+package org.pm4kinme.node.example;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentNumber;
@@ -24,7 +24,6 @@ public class MyExampleNodeNodeDialog extends DefaultNodeSettingsPane {
      */
     protected MyExampleNodeNodeDialog() {
         super();
-        
         addDialogComponent(new DialogComponentNumber(
                 new SettingsModelIntegerBounded(
                     MyExampleNodeNodeModel.CFGKEY_COUNT,

@@ -1,0 +1,7 @@
+In general, we can follow the README provided by KNIME
+
+1. install: Eclipse PDE
+
+2. import all three projects in eclipse
+
+

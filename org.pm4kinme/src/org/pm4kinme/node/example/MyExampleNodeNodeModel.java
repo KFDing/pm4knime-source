@@ -1,4 +1,4 @@
-package org.knime.example.node;
+package org.pm4kinme.node.example;
 
 import java.io.File;
 import java.io.IOException;

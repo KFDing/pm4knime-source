@@ -2,9 +2,10 @@
  * $Revision$ $Date$ $Author$
  *
  */
-package org.knime.example.node;
+package org.pm4kinme.node.example;
 
 import org.eclipse.core.runtime.Plugin;
+import org.knime.core.node.port.PortTypeRegistry;
 import org.osgi.framework.BundleContext;
 
 /**

@@ -1,0 +1,25 @@
+<ivysettings>
+    <settings defaultResolver="default" />   
+    <resolvers>
+        <url name="rapidprom" checkmodified="true">
+            <ivy pattern="https://github.com/rapidprom/rapidprom-libraries/raw/4.0.2/prom/[module]-[revision]/ivy-[module]-[revision].xml" />
+            <artifact pattern="https://github.com/rapidprom/rapidprom-libraries/raw/4.0.2/prom/[module]-[revision]/[module]-[revision].[ext]" />
+        	<artifact pattern="https://github.com/rapidprom/rapidprom-libraries/raw/4.0.2/prom/[module]-[revision]/[artifact].[ext]" />
+        </url>
+        <url name="rapidprom-libs-thirdparty">
+            <ivy pattern="https://github.com/rapidprom/rapidprom-libraries/raw/4.0.2/thirdparty/lib/[module]-[revision]/ivy-[module]-[revision].xml" />
+            <artifact pattern="https://github.com/rapidprom/rapidprom-libraries/raw/4.0.2/thirdparty/lib/[module]-[revision]/[module]-[revision].[ext]" />
+         </url>
+         <url name="rapidprom-resources-thirdparty">
+            <ivy pattern="https://github.com/rapidprom/rapidprom-libraries/raw/4.0.2/thirdparty/resource/[module]-[revision]/ivy-[module]-[revision].xml" />
+            <artifact pattern="https://github.com/rapidprom/rapidprom-libraries/raw/4.0.2/thirdparty/resource/[module]-[revision]/[module]-[revision].[ext]" />
+         </url>
+        <ibiblio name="maven2" m2compatible="true"/>
+        <chain name="default" returnFirst="true">  
+            <resolver ref="rapidprom" />  
+            <resolver ref="rapidprom-libs-thirdparty" />
+            <resolver ref="rapidprom-resources-thirdparty" />
+            <resolver ref="maven2" />  
+        </chain>  
+    </resolvers>
+</ivysettings>

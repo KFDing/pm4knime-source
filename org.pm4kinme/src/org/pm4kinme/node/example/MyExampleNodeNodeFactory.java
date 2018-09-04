@@ -1,4 +1,4 @@
-package org.knime.example.node;
+package org.pm4kinme.node.example;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
