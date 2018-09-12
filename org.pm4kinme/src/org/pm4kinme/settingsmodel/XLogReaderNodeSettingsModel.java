@@ -21,6 +21,7 @@ public class XLogReaderNodeSettingsModel extends SettingsModel {
 	private final SettingsModelXLogImporter importer = new SettingsModelXLogImporter(CFG_KEY_IMPORTER,
 			CFG_DEFAULT_VALUE_IMPORTER);
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected XLogReaderNodeSettingsModel createClone() {
 		XLogReaderNodeSettingsModel clone = new XLogReaderNodeSettingsModel();

@@ -3,6 +3,7 @@ package org.pm4kinme.node.io.read;
 import java.io.File;
 import java.io.IOException;
 
+import org.deckfour.xes.model.XLog;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -15,8 +16,10 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
+import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
 import org.pm4kinme.portobject.XLogPortObject;
 import org.pm4kinme.settingsmodel.XLogReaderNodeSettingsModel;
+import org.processmining.plugins.log.OpenNaiveLogFilePlugin;
 
 public class XLogReaderNodeModel extends NodeModel {
 
@@ -31,9 +34,16 @@ public class XLogReaderNodeModel extends NodeModel {
 
 	@Override
 	protected PortObject[] execute(final PortObject[] inObjects, final ExecutionContext exec) throws Exception {
-		System.out.print("log location:" + params.getFilePathSettingsModel().getStringValue());
-
-		return new PortObject[] { new XLogPortObject(null) };
+		logger.info("start: import event log");
+		File file = new File(params.getFilePathSettingsModel().getStringValue());
+		XLog result = null;
+		OpenNaiveLogFilePlugin plugin = new OpenNaiveLogFilePlugin();
+		result = (XLog) plugin.importFile(
+				PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(OpenNaiveLogFilePlugin.class), file);
+		XLogPortObject po = new XLogPortObject();
+		po.setLog(result);
+		logger.info("end: import event log");
+		return new PortObject[] { new XLogPortObject() };
 	}
 
 	@Override

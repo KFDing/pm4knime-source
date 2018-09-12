@@ -21,14 +21,14 @@ public class XLogPortObject extends AbstractPortObject {
      */
     public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(XLogPortObject.class);
 	
-	private final Object log;
+	private XLog log;
 	
-	public XLogPortObject(Object log) {
-		this.log = log;
+	public XLog getLog() {
+		return log;
 	}
 	
-	public Object get() {
-		return log;
+	public void setLog(final XLog log) {
+		this.log = log;
 	}
 
 	@Override

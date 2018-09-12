@@ -2,9 +2,6 @@ package org.pm4kinme.settingsmodel;
 
 import java.util.EnumSet;
 
-import org.knime.base.node.io.filereader.FileReaderAdvancedDialog;
-import org.knime.base.node.io.filereader.FileReaderNodeSettings;
-import org.knime.base.node.io.filereader.FileReaderSettings;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;

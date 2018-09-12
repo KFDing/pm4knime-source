@@ -62,6 +62,7 @@ import org.xml.sax.SAXException;
 
 
 
+
 public class PM4KNIMEPluginManager implements PluginManager {
 	
 	private static final char PACKAGE_SEPARATOR = '.';
@@ -383,6 +384,7 @@ public class PM4KNIMEPluginManager implements PluginManager {
 				}
 			}
 		} catch (Throwable t) {
+			System.out.println(t.getMessage());
 			fireError(url, t, className);
 			if (Boot.VERBOSE != Level.NONE) {
 				System.err.println("ERROR while scanning for plugins at: " + url + ":");
@@ -392,6 +394,34 @@ public class PM4KNIMEPluginManager implements PluginManager {
 			}
 		}
 		return isAnnotated ? className : null;
+	}
+	
+	private boolean loadPluginFromClass(Class<?> pluginClass, PackageDescriptor pack) {
+		boolean isAnnotated = false;
+		Method[] methods = pluginClass.getMethods();
+		// Check if plugin annotation is present
+		if (pluginClass.isAnnotationPresent(Plugin.class) && isGoodPlugin(pluginClass, methods)) {
+			PM4KNIMEPluginDescriptor pl;
+			try {
+				pl = new PM4KNIMEPluginDescriptor(pluginClass, pluginContextType, pack);
+				addPlugin(pl);
+				isAnnotated = true;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		for (Method method : methods) {
+			if (method.isAnnotationPresent(Plugin.class) && isGoodPlugin(method)) {
+				try {
+					PM4KNIMEPluginDescriptor pl = new PM4KNIMEPluginDescriptor(method, pack);
+					addPlugin(pl);
+					isAnnotated = true;
+				} catch (Exception e) {
+					System.err.println("ERROR while adding plugin: " + pluginClass.getCanonicalName() + ":" + e.getMessage());
+				}
+			}
+		}
+		return isAnnotated;
 	}
 
 	private void addPlugin(PM4KNIMEPluginDescriptor pl) {
@@ -717,6 +747,15 @@ public class PM4KNIMEPluginManager implements PluginManager {
 
 	public PluginDescriptor getPlugin(PluginDescriptorID id) {
 		return plugins.get(id);
+	}
+	
+	public PluginDescriptor getPlugin(Class<?> pluginClass) {
+		PluginDescriptor res = getPlugin(pluginClass.getCanonicalName());
+		if (res == null) {
+			loadPluginFromClass(pluginClass, PM4KNIMEGlobalContext.instance().getPackageDescriptor());
+			res = getPlugin(pluginClass.getCanonicalName());
+		}
+		return res;
 	}
 
 	public PluginDescriptor getPlugin(String id) {

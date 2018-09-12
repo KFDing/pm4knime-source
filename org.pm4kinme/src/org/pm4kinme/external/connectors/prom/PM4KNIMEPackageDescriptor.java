@@ -16,7 +16,7 @@ import org.processmining.framework.packages.PackageDescriptor;
  */
 public class PM4KNIMEPackageDescriptor extends PackageDescriptor {
 
-	private static final String NAME = "rapidprom";
+	private static final String NAME = "pm4knime";
 	// TODO: read this from some properties file
 	private static final String VERSION = "0.0.1";
 	// TODO: use a util function that returns the appropriate value here
@@ -25,8 +25,8 @@ public class PM4KNIMEPackageDescriptor extends PackageDescriptor {
 	private static final String ORGANISATION = "RWTH / Fraunhofer FIT";
 	private static final String AUTHOR = "S.J. van Zelst";
 	private static final String MAINTAINER = "S.J. van Zelst";
-	private static final String LICENSE = "TBD";
-	private static final String URL = "TBD";
+	private static final String LICENSE = "Apache 2.0";
+	private static final String URL = "http://pm4knime.github.io";
 	private static final String LOGO_URL = "http://www.promtools.org/lib/exe/fetch.php?w=300&tok=d1d68b&media=rapidprom:logo.png";
 	private static final String KEYWORDS = "";
 	private static final boolean AUTO_INSTALLED = true;

@@ -6,7 +6,6 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.ModelContentWO;
 import org.knime.core.node.port.AbstractSimplePortObjectSpec;
-import org.knime.core.node.port.PortObjectSpec;
 
 public class XLogPortObjectSpec extends AbstractSimplePortObjectSpec {
 

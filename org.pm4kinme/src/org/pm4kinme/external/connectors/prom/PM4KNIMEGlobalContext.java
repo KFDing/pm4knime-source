@@ -4,7 +4,9 @@ import java.lang.annotation.Annotation;
 
 import org.processmining.framework.connections.ConnectionManager;
 import org.processmining.framework.connections.impl.ConnectionManagerImpl;
+import org.processmining.framework.packages.PackageDescriptor;
 import org.processmining.framework.plugin.PluginContext;
+import org.processmining.framework.plugin.PluginDescriptor;
 import org.processmining.framework.plugin.PluginManager;
 import org.processmining.framework.plugin.ProMFuture;
 import org.processmining.framework.plugin.Progress;
@@ -15,6 +17,7 @@ public class PM4KNIMEGlobalContext extends AbstractGlobalContext {
 
 	private static PM4KNIMEGlobalContext instance = null;
 
+	private static PackageDescriptor pd = null;
 
 	public static PM4KNIMEGlobalContext instance() {
 		if (instance == null) {
@@ -26,13 +29,20 @@ public class PM4KNIMEGlobalContext extends AbstractGlobalContext {
 
 	private final ConnectionManager connMgr;
 
-	private final PM4KNIMEPluginContext context = new PM4KNIMEPluginContext(this, "RapidProM root plugin context");
+	private final PM4KNIMEPluginContext context = new PM4KNIMEPluginContext(this, "pm4knime root plugin context");
 
 	private final PluginManager pluginManager;
 
 	private PM4KNIMEGlobalContext(PluginManager pluginManager) {
 		this.pluginManager = pluginManager;
 		this.connMgr = new ConnectionManagerImpl(pluginManager);
+	}
+
+	public PackageDescriptor getPackageDescriptor() {
+		if (pd == null) {
+			pd = new PM4KNIMEPackageDescriptor();
+		}
+		return pd;
 	}
 
 	@Override
@@ -63,20 +73,22 @@ public class PM4KNIMEGlobalContext extends AbstractGlobalContext {
 				break;
 			}
 		}
+		if (result == null) {
+			// not registered yet, try to do that now...
+		}
 		return result;
 	}
 
 	/**
-	 * This method prepares a PluginContext object, which is a child object of
-	 * the PluginContext provided by the "PluginContextManager". Basically this
-	 * method mimics some of the internal workings of the ProM framework, e.g.
-	 * setting the future result objects.
+	 * This method prepares a PluginContext object, which is a child object of the
+	 * PluginContext provided by the "PluginContextManager". Basically this method
+	 * mimics some of the internal workings of the ProM framework, e.g. setting the
+	 * future result objects.
 	 * <p>
-	 * This method requires that the supplied class contains a plugin variant
-	 * with the {@link PluginContext} annotation.
+	 * This method requires that the supplied class contains a plugin variant with
+	 * the {@link PluginContext} annotation.
 	 * 
-	 * @param classContainingProMPlugin
-	 *            the class that contains the ProM plugin code
+	 * @param classContainingProMPlugin the class that contains the ProM plugin code
 	 * @return
 	 */
 	public PluginContext getFutureResultAwarePluginContext(Class<?> classContainingProMPlugin) {
@@ -93,9 +105,10 @@ public class PM4KNIMEGlobalContext extends AbstractGlobalContext {
 					.createChildContext("rprom_child_context_" + System.currentTimeMillis());
 		}
 		Plugin pluginAnn = findAnnotation(classContainingProMPlugin.getAnnotations(), Plugin.class);
+		PluginDescriptor pd = ((PM4KNIMEPluginManager) PM4KNIMEGlobalContext.instance().getPluginManager())
+				.getPlugin(classContainingProMPlugin);
 		PM4KNIMEPluginExecutionResult per = new PM4KNIMEPluginExecutionResult(pluginAnn.returnTypes(),
-				pluginAnn.returnLabels(), PM4KNIMEGlobalContext.instance().getPluginManager()
-						.getPlugin(classContainingProMPlugin.getCanonicalName()));
+				pluginAnn.returnLabels(), pd);
 		ProMFuture<?>[] futures = createProMFutures(pluginAnn);
 		per.setRapidProMFuture(futures);
 		result.setFuture(per);
@@ -112,7 +125,8 @@ public class PM4KNIMEGlobalContext extends AbstractGlobalContext {
 	}
 
 	public PluginContext getProgressAwarePluginContext(Progress progress) {
-		return getPM4KNIMEMainPluginContext().createChildContext("rprom_child_context_" + System.currentTimeMillis(), progress);
+		return getPM4KNIMEMainPluginContext().createChildContext("rprom_child_context_" + System.currentTimeMillis(),
+				progress);
 	}
 
 	public PluginContext getPluginContext() {
@@ -133,5 +147,4 @@ public class PM4KNIMEGlobalContext extends AbstractGlobalContext {
 		return (PM4KNIMEPluginContext) getMainPluginContext();
 	}
 
-	
 }
