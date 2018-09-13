@@ -14,6 +14,10 @@
             level-id="io"
             name="IO"
             path="/processmining" />
+        <category
+            level-id="discovery"
+            name="Discovery"
+            path="/processmining" />
    </extension>
    <extension
          point="org.knime.workbench.repository.nodes">
@@ -21,6 +25,10 @@
             category-path="/processmining/io"
             factory-class="org.pm4kinme.node.io.read.XLogReaderNodeFactory"
             id="org.pm4kinme.node.io.read.XLogReaderNodeFactory"/>
+       <node
+            category-path="/processmining/discovery"
+            factory-class="org.pm4kinme.node.discovery.alpha.AlphaMinerNodeFactory"
+            id="org.pm4kinme.node.discovery.alpha.AlphaMinerNodeFactory"/>
     </extension>
     <extension
           point="org.knime.core.PortType">
@@ -31,6 +39,14 @@
              objectSerializer="org.pm4kinme.portobject.XLogPortObject$XLogPortObjectSerializer"
              specClass="org.pm4kinme.portobject.XLogPortObjectSpec"
              specSerializer="org.pm4kinme.portobject.XLogPortObjectSpec$XLogPortObjectSpecSerializer">
+       </portType>
+       <portType
+             hidden="false"
+             name="Petri Net"
+             objectClass="org.pm4kinme.portobject.PetriNetPortObject"
+             objectSerializer="org.pm4kinme.portobject.PetriNetPortObject$PetriNetPortObjectSerializer"
+             specClass="org.pm4kinme.portobject.PetriNetPortObjectSpec"
+             specSerializer="org.pm4kinme.portobject.PetriNetPortObjectSpec$PetriNetPortObjectSpecSerializer">
        </portType>
     </extension>
 </plugin>

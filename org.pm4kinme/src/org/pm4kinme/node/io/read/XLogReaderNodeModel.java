@@ -43,7 +43,7 @@ public class XLogReaderNodeModel extends NodeModel {
 		XLogPortObject po = new XLogPortObject();
 		po.setLog(result);
 		logger.info("end: import event log");
-		return new PortObject[] { new XLogPortObject() };
+		return new PortObject[] { po };
 	}
 
 	@Override

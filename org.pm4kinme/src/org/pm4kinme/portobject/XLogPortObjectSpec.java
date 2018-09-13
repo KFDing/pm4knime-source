@@ -17,18 +17,15 @@ public class XLogPortObjectSpec extends AbstractSimplePortObjectSpec {
 	@Override
 	protected void save(ModelContentWO model) {
 		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	protected void load(ModelContentRO model) throws InvalidSettingsException {
 		// TODO Auto-generated method stub
-
 	}
 
 	public static class XLogPortObjectSpecSerializer
 			extends AbstractSimplePortObjectSpec.AbstractSimplePortObjectSpecSerializer<XLogPortObjectSpec> {
-
 	}
 
 }
