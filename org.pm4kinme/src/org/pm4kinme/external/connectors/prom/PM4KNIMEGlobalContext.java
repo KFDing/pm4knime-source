@@ -7,6 +7,7 @@ import org.processmining.framework.connections.impl.ConnectionManagerImpl;
 import org.processmining.framework.packages.PackageDescriptor;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.plugin.PluginDescriptor;
+import org.processmining.framework.plugin.PluginExecutionResult;
 import org.processmining.framework.plugin.PluginManager;
 import org.processmining.framework.plugin.ProMFuture;
 import org.processmining.framework.plugin.Progress;
@@ -145,6 +146,21 @@ public class PM4KNIMEGlobalContext extends AbstractGlobalContext {
 
 	public PM4KNIMEPluginContext getPM4KNIMEPluginContext() {
 		return (PM4KNIMEPluginContext) getMainPluginContext();
+	}
+	// create new methods to allow context accept the future result without giving plugin names on it
+	public PM4KNIMEPluginContext getPM4KNIMEPluginContextWithFutureResult(int len) {
+		ProMFuture<?>[] futures = new ProMFuture<?>[len];
+		for(int i=0;i<len;i++) {
+			futures[i] = new ProMFuture<Object>(Object.class, i+"") {
+				@Override
+				protected Object doInBackground() throws Exception {
+					// TODO Auto-generated method stub
+					return null;
+				}
+			};
+		}
+		
+		return context;
 	}
 
 }

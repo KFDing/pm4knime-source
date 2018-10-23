@@ -1,11 +1,15 @@
 package org.pm4kinme.portobject;
 
+import static org.hamcrest.Matchers.nullValue;
+
 import java.io.IOException;
+import java.util.Set;
 
 import javax.swing.JComponent;
 
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.AbstractPortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortObjectZipInputStream;
@@ -18,6 +22,7 @@ import org.processmining.models.graphbased.directed.petrinet.InhibitorNet;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.ResetInhibitorNet;
 import org.processmining.models.graphbased.directed.petrinet.ResetNet;
+import org.processmining.models.semantics.petrinet.Marking;
 import org.processmining.plugins.petrinet.PetriNetVisualization;
 
 public class PetriNetPortObject extends AbstractPortObject {
@@ -27,8 +32,56 @@ public class PetriNetPortObject extends AbstractPortObject {
 	 */
 	public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(PetriNetPortObject.class);
 
+	private PetriNetPortObjectSpec m_spec ;
 	private Petrinet net = null;
+	private Marking initMarking = null;
+	private Marking finalMarking = null;
 
+	private  Set<Marking> finalMarkingSet = null;
+	
+	private SettingsModelString m_fileName;
+
+	public PetriNetPortObject(final PetriNetPortObjectSpec spec) {
+		if(spec != null)
+			m_spec = spec;
+		else
+			m_spec = new PetriNetPortObjectSpec();
+	}
+	
+	public PetriNetPortObject(PetriNetPortObjectSpec petriNetPortObjectSpec, SettingsModelString m_fileName) {
+		// TODO Auto-generated constructor stub
+		this.m_fileName = m_fileName;
+		if(petriNetPortObjectSpec != null)
+			m_spec =  petriNetPortObjectSpec;
+		else
+			// usually we need to create it by using the creator,but I don't really understand its meaning..
+			m_spec = new PetriNetPortObjectSpec();
+	}
+
+	public PetriNetPortObject() {
+		// TODO Auto-generated constructor stub
+	}
+
+	public Marking getInitMarking() {
+		return initMarking;
+	}
+
+	public void setInitMarking(Marking initMarking) {
+		this.initMarking = initMarking;
+	}
+
+	public Marking getFinalMarking() {
+		return finalMarking;
+	}
+
+	public void setFinalMarking(Marking finalMarking) {
+		this.finalMarking = finalMarking;
+	}
+
+	public void setFinalMarking(Set<Marking> s) {
+		this.finalMarkingSet = s;
+	}
+	
 	public Petrinet getNet() {
 		return net;
 	}
@@ -44,7 +97,7 @@ public class PetriNetPortObject extends AbstractPortObject {
 
 	@Override
 	public PortObjectSpec getSpec() {
-		return new PetriNetPortObjectSpec();
+		return m_spec;
 	}
 
 	@Override
@@ -71,6 +124,7 @@ public class PetriNetPortObject extends AbstractPortObject {
 
 	}
 
+	// initialize the PortObject based on the input stream
 	@Override
 	protected void load(PortObjectZipInputStream in, PortObjectSpec spec, ExecutionMonitor exec)
 			throws IOException, CanceledExecutionException {

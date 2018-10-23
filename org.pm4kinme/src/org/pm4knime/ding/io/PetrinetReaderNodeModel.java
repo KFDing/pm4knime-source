@@ -1,0 +1,301 @@
+package org.pm4knime.ding.io;
+
+import static org.hamcrest.Matchers.nullValue;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+import org.eclipse.jface.action.StatusLineContributionItem;
+import org.knime.core.data.DataCell;
+import org.knime.core.data.DataColumnSpec;
+import org.knime.core.data.DataColumnSpecCreator;
+import org.knime.core.data.DataRow;
+import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.RowKey;
+import org.knime.core.data.def.DefaultRow;
+import org.knime.core.data.def.DoubleCell;
+import org.knime.core.data.def.IntCell;
+import org.knime.core.data.def.StringCell;
+import org.knime.core.node.BufferedDataContainer;
+import org.knime.core.node.BufferedDataTable;
+import org.knime.core.node.CanceledExecutionException;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
+import org.knime.core.node.port.PortObject;
+import org.knime.core.node.port.PortObjectSpec;
+import org.knime.core.node.port.PortType;
+import org.knime.core.node.util.CheckUtils;
+import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
+import org.pm4kinme.portobject.PetriNetPortObject;
+import org.pm4kinme.portobject.PetriNetPortObjectSpec;
+import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
+import org.processmining.acceptingpetrinet.plugins.ImportAcceptingPetriNetPlugin;
+import org.processmining.framework.plugin.PluginContext;
+import org.processmining.models.graphbased.directed.petrinet.Petrinet;
+import org.processmining.models.semantics.petrinet.Marking;
+import org.processmining.plugins.pnml.importing.PnmlImportNet;
+import org.knime.core.node.ExecutionContext;
+import org.knime.core.node.ExecutionMonitor;
+import org.knime.core.node.InvalidSettingsException;
+import org.knime.core.node.NodeCreationContext;
+import org.knime.core.node.NodeLogger;
+import org.knime.core.node.NodeModel;
+import org.knime.core.node.NodeSettingsRO;
+import org.knime.core.node.NodeSettingsWO;
+
+
+/**
+ * This is the model implementation of PetrinetReader.
+ * read Petri net from pnml file
+ *
+ * @author KFDing
+ */
+public class PetrinetReaderNodeModel extends NodeModel {
+    
+    // the logger instance
+    private static final NodeLogger logger = NodeLogger
+            .getLogger(PetrinetReaderNodeModel.class);
+    
+    public static final String CFG_FILE_NAME = "fileName";
+
+    // now we should assign one read types to the model
+    public static final String GFG_PETRINET_TYPE = "petrinetType";
+    // don't know the use of this parameter
+	public static final String CFG_HISTORY_ID = "historyID";
+	
+	public static final String[] defaultValue = new String[] {"Naive Petri Net", "Accepting Petrin Net"};
+    
+	private final SettingsModelString m_fileName = new SettingsModelString(PetrinetReaderNodeModel.CFG_FILE_NAME, "");
+	private final SettingsModelString m_type = new SettingsModelString(GFG_PETRINET_TYPE, "");
+	
+	private PetriNetPortObject m_netPort = new PetriNetPortObject();
+	
+    public PetrinetReaderNodeModel() {
+    
+        // TODO one incoming port and one outgoing port is assumed
+        super(new PortType[] {PetriNetPortObject.TYPE_OPTIONAL}, new PortType[] {PetriNetPortObject.TYPE});
+    }
+
+    public PetrinetReaderNodeModel(final NodeCreationContext context) {
+        
+        // TODO one incoming port and one outgoing port is assumed
+        super(new PortType[0], new PortType[] {PetriNetPortObject.TYPE});
+        m_fileName.setStringValue(context.getUrl().toString());
+    }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected PortObject[] execute(final PortObject[] inData,
+            final ExecutionContext exec) throws Exception {
+
+        
+        // firstly to test those codes given one path and see if it works well in such cases
+        // here we also need to set the PluginContext as the global value, like the flowVariable
+        
+        if(m_type.getStringValue().equals(defaultValue[0])) {
+            logger.info("Read Naive Petri net !");
+            Object[] result = importPetriNet();
+        	m_netPort.setNet((Petrinet) result[0]);
+    		m_netPort.setInitMarking((Marking) result[1]);
+        }else if(m_type.getStringValue().equals(defaultValue[1])) {
+        	logger.info("Read Accepting Petri net !");
+        	AcceptingPetriNet result =  importAcceptingPetriNet();
+        	m_netPort.setNet(result.getNet());
+    		m_netPort.setInitMarking(result.getInitialMarking());
+    		m_netPort.setFinalMarking(result.getFinalMarkings());
+        }
+		
+		logger.info("end of reading of Petri net");
+        return new PortObject[] {m_netPort};
+    }
+    
+    private Object[] importPetriNet() {
+    	PluginContext context = PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(PnmlImportNet.class);
+        PnmlImportNet importer = new PnmlImportNet();
+        
+		try {
+			Object[] result = (Object[]) importer.importFile(context, m_fileName.getStringValue());
+			
+			return result;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+    	
+    }
+
+    
+    private AcceptingPetriNet importAcceptingPetriNet() {
+    	PluginContext context = PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(ImportAcceptingPetriNetPlugin.class);
+    	ImportAcceptingPetriNetPlugin plugin = new ImportAcceptingPetriNetPlugin();
+    	try {
+			AcceptingPetriNet result =  (AcceptingPetriNet) plugin.importFile(context, m_fileName.getStringValue());
+			
+			return result;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+    	return null;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void reset() {
+        // TODO Code executed on reset.
+        // Models build during execute are cleared here.
+        // Also data handled in load/saveInternals will be erased here.
+    }
+
+    /**
+     * we need to define our own Spec for the Petri net and not DataTableSpec
+     * {@inheritDoc}
+     */
+    @Override
+    protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
+            throws InvalidSettingsException {
+        
+        // here to check if the file exists,if not, it gives a warning information
+    	String fileS = m_fileName.getStringValue();
+    	String warning = CheckUtils.checkSourceFile(fileS);
+    	if(warning != null ) {
+    		setWarningMessage(warning);
+    	}
+    	// we need to get the values from inSpecs to m_fileName?? Or we have it directly?? 
+    	URL url = getURLFromSettings(fileS);
+    	if(url == null) {
+    		throw new IllegalArgumentException("url can't be null");
+    	}
+    	String url2String ;
+    	if("file".equals(url.getProtocol())) {
+    		try {
+    			url2String =  new File(url.toURI()).getAbsolutePath();
+    		}catch(Exception e){
+    			url2String = url.toString();
+    			String msg = "File \"" + url + "\" is not a valid PMML file:\n" + e.getMessage();
+    			setWarningMessage(msg);
+    		}
+    	}else {
+    		url2String = url.toString();
+    	}
+
+    	// we need to pass url2String outside 
+    	// m_fileName.setStringValue(url2String);
+    	
+    	m_netPort = new PetriNetPortObject((PetriNetPortObjectSpec) inSpecs[0], m_fileName);
+    	// create the output Sepc which is actually about the Petri net
+    	// but now we need to read it and assign values to m_netPort, but maybe at the execution part??
+    	PetriNetPortObjectSpec spec =  (PetriNetPortObjectSpec) m_netPort.getSpec();
+    	// we don't really change some thing here
+    	// but if we want to change, we should do it here?? 
+        return new PortObjectSpec[]{spec};
+    }
+
+    /** Convert argument string to a URL.
+     * @param fileS The file string (a url or a file path)
+     * @return The url (if it's a path then file access is checked)
+     * @throws InvalidSettingsException If no valid url given.
+     */
+   private static URL getURLFromSettings(final String fileS)
+       throws InvalidSettingsException {
+       if (fileS == null || fileS.length() == 0) {
+           throw new InvalidSettingsException("No file/url specified");
+       }
+
+       try {
+           return new URL(fileS);
+       } catch (MalformedURLException e) {
+           File tmp = new File(fileS);
+           if (tmp.isFile() && tmp.canRead()) {
+               try  {
+                   return tmp.getAbsoluteFile().toURI().toURL();
+               } catch (MalformedURLException e1) {
+                   throw new InvalidSettingsException(e1);
+               }
+           }
+           throw new InvalidSettingsException("File/URL \"" + fileS
+                      + "\" cannot be parsed as a URL or represents a non exising file location");
+       }
+
+   }
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveSettingsTo(final NodeSettingsWO settings) {
+
+        // TODO save user settings to the config object.
+      m_fileName.saveSettingsTo(settings);
+      m_type.saveSettingsTo(settings);
+
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
+            throws InvalidSettingsException {
+            
+        // TODO load (valid) settings from the config object.
+        // It can be safely assumed that the settings are valided by the 
+        // method below.
+      m_fileName.loadSettingsFrom(settings);
+      m_type.loadSettingsFrom(settings);
+      
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void validateSettings(final NodeSettingsRO settings)
+            throws InvalidSettingsException {
+    	// here check if the source location has a valid syntax, like it is not empty or in the required extension format
+    	// to make sure the setting can be loaded into the workflow
+    	m_fileName.validateSettings(settings);
+    	m_type.validateSettings(settings);
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void loadInternals(final File internDir,
+            final ExecutionMonitor exec) throws IOException,
+            CanceledExecutionException {
+        
+        // TODO load internal data. 
+        // Everything handed to output ports is loaded automatically (data
+        // returned by the execute method, models loaded in loadModelContent,
+        // and user settings set through loadSettingsFrom - is all taken care 
+        // of). Load here only the other internals that need to be restored
+        // (e.g. data used by the views).
+
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void saveInternals(final File internDir,
+            final ExecutionMonitor exec) throws IOException,
+            CanceledExecutionException {
+       
+        // TODO save internal models. 
+        // Everything written to output ports is saved automatically (data
+        // returned by the execute method, models saved in the saveModelContent,
+        // and user settings saved through saveSettingsTo - is all taken care 
+        // of). Save here only the other internals that need to be preserved
+        // (e.g. data used by the views).
+
+    }
+
+}
+
