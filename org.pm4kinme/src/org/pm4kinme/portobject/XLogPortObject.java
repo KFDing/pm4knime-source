@@ -9,6 +9,7 @@ import java.util.zip.ZipEntry;
 
 import javax.swing.JComponent;
 
+import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.factory.XFactoryRegistry;
 import org.deckfour.xes.in.XParser;
 import org.deckfour.xes.in.XesXmlParser;
@@ -26,6 +27,8 @@ import org.knime.core.node.port.PortTypeRegistry;
 import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
 import org.processmining.plugins.log.ui.logdialog.SlickerOpenLogSettings;
 
+import sun.util.logging.resources.logging;
+
 public class XLogPortObject extends AbstractPortObject {
 
 	/**
@@ -33,12 +36,13 @@ public class XLogPortObject extends AbstractPortObject {
 	 */
 	public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(XLogPortObject.class);
 
-	private final XLogPortObjectSpec spec = new XLogPortObjectSpec();
+	private  XLogPortObjectSpec spec ;
 
 	private static final String ZIP_ENTRY_NAME = "XLogObject";
 
 	private XLog log = null;
 
+	
 	public XLog getLog() {
 		return log;
 	}
@@ -52,10 +56,15 @@ public class XLogPortObject extends AbstractPortObject {
 		return "This port represents an event log object (XLog)";
 	}
 
+	public void setSpec(XLogPortObjectSpec m_spec) {
+		spec = m_spec;
+	}
+	
 	@Override
 	public PortObjectSpec getSpec() {
 		return spec;
 	}
+	
 
 	@Override
 	public JComponent[] getViews() {

@@ -1,7 +1,5 @@
 package org.pm4kinme.portobject;
 
-import static org.hamcrest.Matchers.nullValue;
-
 import java.io.IOException;
 import java.util.Set;
 
@@ -60,6 +58,7 @@ public class PetriNetPortObject extends AbstractPortObject {
 
 	public PetriNetPortObject() {
 		// TODO Auto-generated constructor stub
+		m_spec = new PetriNetPortObjectSpec();
 	}
 
 	public Marking getInitMarking() {
@@ -120,7 +119,7 @@ public class PetriNetPortObject extends AbstractPortObject {
 	@Override
 	protected void save(PortObjectZipOutputStream out, ExecutionMonitor exec)
 			throws IOException, CanceledExecutionException {
-		// TODO Auto-generated method stub
+		// here I need to change it, to save it into the hard disk
 
 	}
 
@@ -128,7 +127,7 @@ public class PetriNetPortObject extends AbstractPortObject {
 	@Override
 	protected void load(PortObjectZipInputStream in, PortObjectSpec spec, ExecutionMonitor exec)
 			throws IOException, CanceledExecutionException {
-		// TODO Auto-generated method stub
+		// Also here, we need to load it from some stream, I will figure it out later 
 		System.out.println("invoked load method");
 
 	}

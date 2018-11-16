@@ -1,4 +1,4 @@
-package org.pm4knime.ding.io;
+package org.pm4knime.ding.io.petrinet.reader;
 
 import javax.swing.JFileChooser;
 

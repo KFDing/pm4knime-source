@@ -2,7 +2,12 @@ package org.pm4kinme.node.io.read;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.List;
 
+import org.deckfour.xes.classification.XEventClassifier;
+import org.deckfour.xes.info.XLogInfo;
+import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XLog;
 import org.knime.core.node.CanceledExecutionException;
 import org.knime.core.node.ExecutionContext;
@@ -18,6 +23,8 @@ import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
 import org.pm4kinme.portobject.XLogPortObject;
+import org.pm4kinme.portobject.XLogPortObjectSpec;
+import org.pm4kinme.portobject.XLogPortObjectSpecCreator;
 import org.pm4kinme.settingsmodel.XLogReaderNodeSettingsModel;
 import org.processmining.plugins.log.OpenNaiveLogFilePlugin;
 
@@ -27,6 +34,8 @@ public class XLogReaderNodeModel extends NodeModel {
 	private static final NodeLogger logger = NodeLogger.getLogger(XLogReaderNodeModel.class);
 	private final XLogReaderNodeSettingsModel params = new XLogReaderNodeSettingsModel();
 
+	private XLogPortObjectSpec outSpec ;
+	
 	protected XLogReaderNodeModel() {
 		super(new PortType[] {},
 				new PortType[] { PortTypeRegistry.getInstance().getPortType(XLogPortObject.class, false) });
@@ -41,14 +50,30 @@ public class XLogReaderNodeModel extends NodeModel {
 		result = (XLog) plugin.importFile(
 				PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(OpenNaiveLogFilePlugin.class), file);
 		XLogPortObject po = new XLogPortObject();
+		
 		po.setLog(result);
 		logger.info("end: import event log");
+		// how to use the PortObject to change the SpecValues??
+		System.out.println("print the value of outspec"+ outSpec.toString());
+		po.setSpec(outSpec);
+		// we create classifier for this function
+		Collection<XEventClassifier> classifiers = result.getClassifiers();
+		if(classifiers.isEmpty()) {
+			XLogInfo info = XLogInfoFactory.createLogInfo(result);
+			classifiers = info.getEventClassifiers();
+			
+		}
+		outSpec.setClassifiers(classifiers);
 		return new PortObject[] { po };
 	}
 
 	@Override
 	protected PortObjectSpec[] configure(PortObjectSpec[] inSpecs) {
-		return new PortObjectSpec[] { null };
+		// we need to assign actually here about the outputSepc 
+		XLogPortObjectSpecCreator creator =  new XLogPortObjectSpecCreator();
+		outSpec = creator.createSpec();
+		
+		return new PortObjectSpec[] { outSpec};
 	}
 
 	@Override

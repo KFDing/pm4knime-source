@@ -1,13 +1,27 @@
 package org.pm4kinme.portobject;
 
+import java.util.Collection;
+import java.util.List;
+
 import javax.swing.JComponent;
 
+import org.deckfour.xes.classification.XEventClassifier;
 import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.ModelContentRO;
 import org.knime.core.node.ModelContentWO;
 import org.knime.core.node.port.AbstractSimplePortObjectSpec;
 
 public class XLogPortObjectSpec extends AbstractSimplePortObjectSpec {
+
+	Collection<XEventClassifier> classifiers = null;
+	
+	public Collection<XEventClassifier> getClassifiers() {
+		return classifiers;
+	}
+
+	public void setClassifiers(Collection<XEventClassifier> classifiers2) {
+		this.classifiers = classifiers2;
+	}
 
 	@Override
 	public JComponent[] getViews() {
