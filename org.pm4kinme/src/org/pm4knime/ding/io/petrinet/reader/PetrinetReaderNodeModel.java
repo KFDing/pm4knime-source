@@ -1,27 +1,16 @@
 package org.pm4knime.ding.io.petrinet.reader;
 
-import static org.hamcrest.Matchers.nullValue;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.eclipse.jface.action.StatusLineContributionItem;
-import org.knime.core.data.DataCell;
-import org.knime.core.data.DataColumnSpec;
-import org.knime.core.data.DataColumnSpecCreator;
+import org.knime.base.node.preproc.filter.row.RowFilterIterator;
+import org.knime.base.node.preproc.sample.LinearSamplingRowFilter;
 import org.knime.core.data.DataRow;
-import org.knime.core.data.DataTableSpec;
-import org.knime.core.data.RowKey;
-import org.knime.core.data.def.DefaultRow;
-import org.knime.core.data.def.DoubleCell;
-import org.knime.core.data.def.IntCell;
-import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
 import org.knime.core.node.CanceledExecutionException;
-import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
@@ -39,7 +28,6 @@ import org.processmining.plugins.pnml.importing.PnmlImportNet;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
 import org.knime.core.node.InvalidSettingsException;
-import org.knime.core.node.NodeCreationContext;
 import org.knime.core.node.NodeLogger;
 import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
@@ -58,7 +46,7 @@ public class PetrinetReaderNodeModel extends NodeModel {
     private static final NodeLogger logger = NodeLogger
             .getLogger(PetrinetReaderNodeModel.class);
     
-    public static final String CFG_FILE_NAME = "fileName";
+    public static final String CFG_FILE_NAME = "PetriNet fileName";
 
     // now we should assign one read types to the model
     public static final String GFG_PETRINET_TYPE = "petrinetType";
@@ -66,35 +54,27 @@ public class PetrinetReaderNodeModel extends NodeModel {
 	public static final String CFG_HISTORY_ID = "historyID";
 	
 	public static final String[] defaultValue = new String[] {"Naive Petri Net", "Accepting Petrin Net"};
+
+	private static final int IN_PORT = 1;
     
 	private final SettingsModelString m_fileName = new SettingsModelString(PetrinetReaderNodeModel.CFG_FILE_NAME, "");
 	private final SettingsModelString m_type = new SettingsModelString(GFG_PETRINET_TYPE, "");
 	
-	private PetriNetPortObject m_netPort = new PetriNetPortObject();
+	private PetriNetPortObject m_netPort = null;
 	
     public PetrinetReaderNodeModel() {
     
-        // TODO one incoming port and one outgoing port is assumed
+        // TODO as one of those tests
         super(new PortType[] {PetriNetPortObject.TYPE_OPTIONAL}, new PortType[] {PetriNetPortObject.TYPE});
     }
 
-    public PetrinetReaderNodeModel(final NodeCreationContext context) {
-        
-        // TODO one incoming port and one outgoing port is assumed
-        super(new PortType[0], new PortType[] {PetriNetPortObject.TYPE});
-        m_fileName.setStringValue(context.getUrl().toString());
-    }
     /**
      * {@inheritDoc}
      */
     @Override
     protected PortObject[] execute(final PortObject[] inData,
             final ExecutionContext exec) throws Exception {
-
-        
-        // firstly to test those codes given one path and see if it works well in such cases
-        // here we also need to set the PluginContext as the global value, like the flowVariable
-        
+    	
         if(m_type.getStringValue().equals(defaultValue[0])) {
             logger.info("Read Naive Petri net !");
             Object[] result = importPetriNet();
@@ -115,16 +95,16 @@ public class PetrinetReaderNodeModel extends NodeModel {
     private Object[] importPetriNet() {
     	PluginContext context = PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(PnmlImportNet.class);
         PnmlImportNet importer = new PnmlImportNet();
-        
+        m_netPort.setContext(context);
 		try {
 			Object[] result = (Object[]) importer.importFile(context, m_fileName.getStringValue());
 			
 			return result;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return null;
 		}
-		return null;
-    	
+	
     }
 
     
@@ -132,6 +112,7 @@ public class PetrinetReaderNodeModel extends NodeModel {
     	PluginContext context = PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(ImportAcceptingPetriNetPlugin.class);
     	ImportAcceptingPetriNetPlugin plugin = new ImportAcceptingPetriNetPlugin();
     	try {
+    		m_netPort.setContext(context);
 			AcceptingPetriNet result =  (AcceptingPetriNet) plugin.importFile(context, m_fileName.getStringValue());
 			
 			return result;
@@ -185,15 +166,15 @@ public class PetrinetReaderNodeModel extends NodeModel {
     		url2String = url.toString();
     	}
 
-    	// we need to pass url2String outside 
-    	// m_fileName.setStringValue(url2String);
+    	// reader node, there is no inSpec for portObject, so we need to create Spec especially for
+    	// Petri net 
+    	// the use of  Spec is what ??
+    	m_netPort = new PetriNetPortObject();
     	
-    	m_netPort = new PetriNetPortObject((PetriNetPortObjectSpec) inSpecs[0], m_fileName);
-    	// create the output Sepc which is actually about the Petri net
-    	// but now we need to read it and assign values to m_netPort, but maybe at the execution part??
     	PetriNetPortObjectSpec spec =  (PetriNetPortObjectSpec) m_netPort.getSpec();
-    	// we don't really change some thing here
-    	// but if we want to change, we should do it here?? 
+    	spec.setFileName(url2String);
+    	// for input data
+    	
         return new PortObjectSpec[]{spec};
     }
 
