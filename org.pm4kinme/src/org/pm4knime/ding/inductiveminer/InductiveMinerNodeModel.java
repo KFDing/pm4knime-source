@@ -32,7 +32,6 @@ import org.processmining.plugins.InductiveMiner.mining.MiningParametersIM;
 import org.processmining.plugins.InductiveMiner.mining.MiningParametersIMf;
 import org.processmining.plugins.InductiveMiner.mining.MiningParametersIMflc;
 import org.processmining.plugins.InductiveMiner.plugins.IM;
-import org.processmining.plugins.InductiveMiner.plugins.IMPetriNet;
 
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
