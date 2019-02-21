@@ -4,5 +4,6 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry exported="true" kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry kind="lib" path="/home/dkf/ProcessMining/programs/KNIME_Development/PM4KNIME/pm4knime-lib/dist/preprocess-evaluation-0.0.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

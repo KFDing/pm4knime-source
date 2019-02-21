@@ -26,7 +26,7 @@ public class RepairEvaluatorNodeFactory
      */
     @Override
     public int getNrNodeViews() {
-        return 1;
+        return 0;
     }
 
     /**
@@ -35,7 +35,7 @@ public class RepairEvaluatorNodeFactory
     @Override
     public NodeView<RepairEvaluatorNodeModel> createNodeView(final int viewIndex,
             final RepairEvaluatorNodeModel nodeModel) {
-        return new RepairEvaluatorNodeView(nodeModel);
+        return null;
     }
 
     /**

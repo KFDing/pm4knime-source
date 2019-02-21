@@ -3,35 +3,22 @@
     <name>RepairEvaluator</name>
     
     <shortDescription>
-        Evaluate the repair model method, to show the confusion matrix
+        Evaluate the repair model method in naive way, to show the confusion matrix
     </shortDescription>
     
     <fullDescription>
         <intro>Insert long description here...</intro>
         
-        
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="In-Port name">Description of first input port...</inPort>
+        <inPort index="0" name="Petri net Inport">Petri net inport</inPort>
+        <inPort index="1" name="Log Inport">XLog inport</inPort>
+        
         <!-- possibly more input ports here-->
-        <outPort index="0" name="Out-Port name">Description of first output port...</outPort>
+        <outPort index="0" name="Confusion Matrix">Output of Confusion Matrix</outPort>
+         <outPort index="1" name="Measurements">Output of Measurements</outPort>
         <!-- possibly more output ports here-->
     </ports>    
-    <views>
-        <view index="0" name="name of first view">Description of first view...</view>
-        <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>
+
 </knimeNode>
