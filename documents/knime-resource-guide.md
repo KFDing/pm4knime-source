@@ -32,4 +32,9 @@ Overview tutorials are posted under the link
 [https://forum.knime.com/c/knime-development]  
 This forum is for KNIME developers, it's helpful to propose questions, but sometimes it might not be so precise. 
 
+## Workflow helper inside KNIME
+![Image](Selection_008.png "Workflow in KNIME") 
+In this image, the examples workflow is given. We can search for certain use of one node, or use this workflow
+as a template.
+
 ## Google, of course, when you have no idea!!
