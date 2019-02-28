@@ -37,4 +37,9 @@ This forum is for KNIME developers, it's helpful to propose questions, but somet
 In this image, the examples workflow is given. We can search for certain use of one node, or use this workflow
 as a template.
 
+## Connect it With Additional Library   
+To use existing plugins in KNIME development, we need to create an additional library with pm4knime-libs. 
+The procedure is under the README.md file. but sometimes there are some exceptions.
+Ivy will download jars for ProM online into ~/.ivy2/cache/* (On my computer) 
+
 ## Google, of course, when you have no idea!!
