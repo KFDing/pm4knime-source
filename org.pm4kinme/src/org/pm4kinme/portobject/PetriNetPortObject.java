@@ -38,7 +38,9 @@ public class PetriNetPortObject implements PortObject {
 	 * Define port type of objects of this class when used as PortObjects.
 	 */
 	public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(PetriNetPortObject.class);
-
+	public static final PortType TYPE_OPTIONAL =
+			PortTypeRegistry.getInstance().getPortType(PetriNetPortObject.class, true);
+	
 	private PetriNetPortObjectSpec m_spec ;
 	private Petrinet net = null;
 	private Marking initMarking = null;

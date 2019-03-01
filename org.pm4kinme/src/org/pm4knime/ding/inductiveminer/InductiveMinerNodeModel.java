@@ -123,11 +123,12 @@ public class InductiveMinerNodeModel extends NodeModel {
         Object[] result = IM.minePetriNet(context, log, createParameters());
         // Object[] result = IMPetriNet.minePetriNet(context, log , param);
         // create the output port object
-        
-        pnPortObject.setNet((Petrinet) result[0]);
-        pnPortObject.setInitMarking((Marking) result[1]);
-        pnPortObject.setFinalMarking((Marking) result[2]);
-        
+        if(pnPortObject.getNet() == null) {
+        	pnPortObject.setContext(context);
+	        pnPortObject.setNet((Petrinet) result[0]);
+	        pnPortObject.setInitMarking((Marking) result[1]);
+	        pnPortObject.setFinalMarking((Marking) result[2]);
+        }
         logger.info("End of the Inductive Miner");
 
         return new PortObject[] { pnPortObject };
@@ -210,6 +211,9 @@ public class InductiveMinerNodeModel extends NodeModel {
     protected PortObjectSpec[] configure(PortObjectSpec[] inSpecs)
             throws InvalidSettingsException {
     	
+    	if(!inSpecs[0].getClass().equals(XLogPortObjectSpec.class)) 
+    		throw new InvalidSettingsException("Input is not a valid Event Log!");
+    	
     	if(classifiers == null || classifiers.isEmpty())
     		classifiers = assignClassifier(inSpecs);
     	if(classifiers == null) {
@@ -223,9 +227,13 @@ public class InductiveMinerNodeModel extends NodeModel {
     		throw new InvalidSettingsException("The inport is not an xlog file");
     	}
     	
-    	pnPortObject =  new PetriNetPortObject();
-    	PetriNetPortObjectSpec pnSpec = pnPortObject.getSpec();
-    	
+    	// here sth goes wrong, because I don't use the right InSpec to define my outSpec, change it
+    	// and see the result
+    	if(pnPortObject == null) {
+    		pnPortObject =  new PetriNetPortObject();
+    		
+    	}
+    	pnSpec = pnPortObject.getSpec();
         return new PortObjectSpec[]{pnSpec};
     }
 
