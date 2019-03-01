@@ -53,9 +53,8 @@ public class PetrinetReaderNodeModel extends NodeModel {
     // don't know the use of this parameter
 	public static final String CFG_HISTORY_ID = "historyID";
 	
-	public static final String[] defaultValue = new String[] {"Naive Petri Net", "Accepting Petrin Net"};
+	public static final String[] defaultValue = new String[] {"Naive Petri Net", "Accepting Petri Net"};
 
-	private static final int IN_PORT = 1;
     
 	private final SettingsModelString m_fileName = new SettingsModelString(PetrinetReaderNodeModel.CFG_FILE_NAME, "");
 	private final SettingsModelString m_type = new SettingsModelString(GFG_PETRINET_TYPE, "");
@@ -171,7 +170,7 @@ public class PetrinetReaderNodeModel extends NodeModel {
     	// the use of  Spec is what ??
     	m_netPort = new PetriNetPortObject();
     	
-    	PetriNetPortObjectSpec spec =  (PetriNetPortObjectSpec) m_netPort.getSpec();
+    	PetriNetPortObjectSpec spec =  m_netPort.getSpec();
     	spec.setFileName(url2String);
     	// for input data
     	

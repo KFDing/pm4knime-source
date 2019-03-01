@@ -80,10 +80,11 @@ public class InductiveMinerNodeModel extends NodeModel {
 	private SettingsModelDoubleBounded m_noiseThreshold = new SettingsModelDoubleBounded(InductiveMinerNodeModel.CFGKEY_NOISE_THRESHOLD, 0.0, 0, 1.0);
 	private SettingsModelString m_classifier = new SettingsModelString(InductiveMinerNodeModel.CFGKEY_CLASSIFIER, "");
 	
-	private MiningParameters param = null;
+	// private MiningParameters param ; // = new MiningParametersIM();
 	private XLog log = null;
 	private XLogPortObject m_logPortObject ;
 	private PetriNetPortObjectSpec pnSpec = null;
+	PetriNetPortObject pnPortObject;
 	Collection<XEventClassifier> classifiers;
 	private Map<String, XEventClassifier> map;
     /**
@@ -93,8 +94,8 @@ public class InductiveMinerNodeModel extends NodeModel {
     	// here we should also create the context and put it here, but how to accept it 
     	// actually from the event reader and then give it here. 
         // super(new PortType[] {XLogPortObject.TYPE}, new PortType[] { PetriNetPortObject.TYPE});
-    	super(new PortType[] { PortTypeRegistry.getInstance().getPortType(XLogPortObject.class, false) },
-				new PortType[] { PortTypeRegistry.getInstance().getPortType(PetriNetPortObject.class, false) });
+    	super(new PortType[] { XLogPortObject.TYPE },
+				new PortType[] { PetriNetPortObject.TYPE });
     	// we need to get such information from log, so we need the in data spec
     }
     
@@ -119,10 +120,10 @@ public class InductiveMinerNodeModel extends NodeModel {
         // second to give the mining context
         PluginContext context =  PM4KNIMEGlobalContext.instance().getPluginContext(); //.getFutureResultAwarePluginContext(IM.class);
         
-        Object[] result = IM.minePetriNet(context, log, param);
+        Object[] result = IM.minePetriNet(context, log, createParameters());
         // Object[] result = IMPetriNet.minePetriNet(context, log , param);
         // create the output port object
-        PetriNetPortObject pnPortObject =  new PetriNetPortObject();
+        
         pnPortObject.setNet((Petrinet) result[0]);
         pnPortObject.setInitMarking((Marking) result[1]);
         pnPortObject.setFinalMarking((Marking) result[2]);
@@ -132,6 +133,30 @@ public class InductiveMinerNodeModel extends NodeModel {
         return new PortObject[] { pnPortObject };
     }
 
+    private  MiningParameters createParameters() throws InvalidSettingsException {
+    	MiningParameters param;
+    	
+    	if(m_type.getStringValue().equals(defaultType[0]))
+        	param = new MiningParametersIM();
+        else if(m_type.getStringValue().equals(defaultType[1]))
+        	param = new MiningParametersIMf();
+        else if(m_type.getStringValue().equals(defaultType[2]))
+        	param = new MiningParametersIMf();
+        else if(m_type.getStringValue().equals(defaultType[3]))
+        	param = new MiningParametersEKS();
+        else if(m_type.getStringValue().equals(defaultType[4]))
+        	param = new MiningParametersIMflc();
+        else 
+        	throw new InvalidSettingsException("unknown inductive miner type "+ m_type.getStringValue());
+        param.setNoiseThreshold((float) m_noiseThreshold.getDoubleValue());
+        // we need to give one of the classifier to have it
+        if(m_classifier.isEnabled()) {
+        	param.setClassifier(map.get(m_classifier.getStringValue()));
+        }
+    	
+        return param;
+    } 
+    
     /**
      * {@inheritDoc}
      */
@@ -184,9 +209,7 @@ public class InductiveMinerNodeModel extends NodeModel {
     @Override
     protected PortObjectSpec[] configure(PortObjectSpec[] inSpecs)
             throws InvalidSettingsException {
-    	if(param!=null && pnSpec!=null) {
-    		return new PortObjectSpec[]{pnSpec};
-    	}
+    	
     	if(classifiers == null || classifiers.isEmpty())
     		classifiers = assignClassifier(inSpecs);
     	if(classifiers == null) {
@@ -199,30 +222,9 @@ public class InductiveMinerNodeModel extends NodeModel {
     	if(! hasXLog) {
     		throw new InvalidSettingsException("The inport is not an xlog file");
     	}
-
-    	// first to assign the MiningParameter from it
-        if(m_type.getStringValue().equals(defaultType[0]))
-        	param = new MiningParametersIM();
-        else if(m_type.getStringValue().equals(defaultType[1]))
-        	param = new MiningParametersIMf();
-        else if(m_type.getStringValue().equals(defaultType[2]))
-        	param = new MiningParametersIMf();
-        else if(m_type.getStringValue().equals(defaultType[3]))
-        	param = new MiningParametersEKS();
-        else if(m_type.getStringValue().equals(defaultType[4]))
-        	param = new MiningParametersIMflc();
-        else 
-        	throw new InvalidSettingsException("unknown inductive miner type "+ m_type.getStringValue());
-        param.setNoiseThreshold((float) m_noiseThreshold.getDoubleValue());
-        // we need to give one of the classifier to have it
-        if(m_classifier.isEnabled()) {
-        	param.setClassifier(map.get(m_classifier.getStringValue()));
-        }
-        // createClassifierMap(classifiers, defaultClassifer);
-        // here we should also use the classifer information for parameter setting
-        
-    	// create output Spec:: Petri net Port Spec
-    	PetriNetPortObjectSpec pnSpec =  new PetriNetPortObjectSpec();
+    	
+    	pnPortObject =  new PetriNetPortObject();
+    	PetriNetPortObjectSpec pnSpec = pnPortObject.getSpec();
     	
         return new PortObjectSpec[]{pnSpec};
     }

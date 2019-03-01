@@ -2,4 +2,5 @@
 */target/
 */build/
 /bin/
-**/lib/
+*/lib/
+**.jar

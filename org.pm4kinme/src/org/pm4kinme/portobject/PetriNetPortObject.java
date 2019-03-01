@@ -104,7 +104,7 @@ public class PetriNetPortObject implements PortObject {
 	}
 
 	@Override
-	public PortObjectSpec getSpec() {
+	public PetriNetPortObjectSpec getSpec() {
 		return m_spec;
 	}
 

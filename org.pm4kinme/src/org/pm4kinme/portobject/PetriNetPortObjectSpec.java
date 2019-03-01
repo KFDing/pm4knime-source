@@ -15,12 +15,12 @@ import org.processmining.framework.plugin.PluginContext;
 public class PetriNetPortObjectSpec extends AbstractSimplePortObjectSpec {
     
 	public static String TEMP_FILE_NAME = "PetriNetPortObjectSpec.pnml";
-	
+	static int count = 0;
 	// we need to record the context of this spec
 	PluginContext context;
 	
 	
-	String fileName;
+	String fileName = TEMP_FILE_NAME;
 	@Override
 	public JComponent[] getViews() {
 		return new JComponent[] {};
@@ -29,7 +29,7 @@ public class PetriNetPortObjectSpec extends AbstractSimplePortObjectSpec {
 	@Override
 	protected void save(ModelContentWO model) {
 		// TODO Auto-generated method stub
-
+		
 	}
 
 	@Override
