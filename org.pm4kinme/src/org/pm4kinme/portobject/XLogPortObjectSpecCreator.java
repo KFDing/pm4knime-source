@@ -25,6 +25,13 @@ public class XLogPortObjectSpecCreator {
 	}
 
 	public XLogPortObjectSpec createSpec() {
+		m_spec =  new XLogPortObjectSpec();
+		return m_spec;
+	}
+	
+	public XLogPortObjectSpec createSpec(String title) {
+		m_spec =  new XLogPortObjectSpec();
+		m_spec.setTitle(title);
 		return m_spec;
 	}
 }

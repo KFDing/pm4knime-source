@@ -13,6 +13,16 @@ import org.knime.core.node.port.AbstractSimplePortObjectSpec;
 
 public class XLogPortObjectSpec extends AbstractSimplePortObjectSpec {
 
+	String title ;
+	// to mark the bottom or top??
+	public void setTitle(String value) {
+		title = value;
+	}
+	
+	public String getTitle(String value) {
+		return title;
+	}
+	
 	Collection<XEventClassifier> classifiers = null;
 	
 	public Collection<XEventClassifier> getClassifiers() {

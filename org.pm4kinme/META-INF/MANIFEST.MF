@@ -3,9 +3,9 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Process Mining extension for KNIME Workbench
 Bundle-SymbolicName: pm4knime-source;singleton:=true
 Bundle-Version: 0.0.1
-Bundle-ClassPath: lib/pm4knime-libs-0.0.1-rc.jar, 
-  lib/preprocess-evaluation-0.0.2.jar,
-  pm4knime-0.0.1.jar
+Bundle-ClassPath: src/,
+ lib/incorporate-negative-information-0.0.1.jar,
+ lib/pm4knime-libs-0.0.1-rc.jar
 Bundle-Activator: org.pm4kinme.PM4KNIMENodePlugin
 Bundle-Vendor: RWTH Aachen / Fraunhofer FIT
 Require-Bundle: org.eclipse.core.runtime,
@@ -14,5 +14,4 @@ Require-Bundle: org.eclipse.core.runtime,
  org.knime.base,
  org.knime.core
 Bundle-ActivationPolicy: lazy
-Export-Package: org.pm4kinme;uses:="org.osgi.framework,org.eclipse.core.runtime"
 

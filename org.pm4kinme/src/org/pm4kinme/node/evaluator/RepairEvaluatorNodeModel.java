@@ -35,6 +35,8 @@ import org.pm4kinme.portobject.PetriNetPortObject;
 import org.pm4kinme.portobject.PetriNetPortObjectSpec;
 import org.pm4kinme.portobject.XLogPortObject;
 import org.pm4kinme.portobject.XLogPortObjectSpec;
+import org.processmining.incorporatenegativeinformation.help.Configuration;
+import org.processmining.incorporatenegativeinformation.plugins.EvaluateResult;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.semantics.petrinet.Marking;
 
@@ -94,23 +96,6 @@ public class RepairEvaluatorNodeModel extends NodeModel {
     	// super(2,2);
         super(new PortType[] {PetriNetPortObject.TYPE, XLogPortObject.TYPE} , new PortType[] {BufferedDataTable.TYPE, BufferedDataTable.TYPE});
     }
-    
-    private int[][] naiveChecking(XLog log, Petrinet net, Marking marking ){
-    	int[][] confusion_matrix = new int[cmRowNum][cmColNum];
-    	// for test to use fake values for it 
-    	confusion_matrix[0][0] = 0;
-    	confusion_matrix[0][1] = 0;
-    	confusion_matrix[1][0] = 0;
-    	confusion_matrix[1][1] = 0;
-    	
-    	confusion_matrix[0][0] = 100;
-    	confusion_matrix[0][1] = 0;
-    	confusion_matrix[1][0] = 50;
-    	confusion_matrix[1][1] = 50;
-    	
-    	
-    	return confusion_matrix;
-    }
 
     /**
      * {@inheritDoc}
@@ -128,9 +113,13 @@ public class RepairEvaluatorNodeModel extends NodeModel {
     	XLog log = logPortObject.getLog();
         // first to use the plugin to get the confusion matrix
     	
-    	int[][] confusion_matrix = naiveChecking(log, net, intialMarking);
+    	List<Integer> result = EvaluateResult.naiveCheckPN(log, net, intialMarking);
     	
-    	
+    	int[][] confusion_matrix = new int[cmRowNum][cmColNum];
+    	confusion_matrix[0][0] = result.get(Configuration.ALLOWED_POS_IDX);
+    	confusion_matrix[0][1] = result.get(Configuration.NOT_ALLOWED_POS_IDX);
+    	confusion_matrix[1][0] = result.get(Configuration.ALLOWED_NEG_IDX);
+    	confusion_matrix[1][1] = result.get(Configuration.NOT_ALLOWED_NEG_IDX);
     	// generate a table from it 
     	DataTableSpec cmSpec = createOutSpec();
     	BufferedDataContainer cm_container = exec.createDataContainer(cmSpec);

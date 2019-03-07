@@ -6,6 +6,7 @@
         <category icon="icons/category_reader.png" level-id="io" name="IO" path="/processmining"/>
         <category level-id="discovery" name="Discovery" path="/processmining"/>
         <category level-id="evaluation" name="Evaluation" path="/processmining"/>
+        <category level-id="manipulation" name="Manipulation" path="/processmining"/>
    </extension>
    <extension point="org.knime.workbench.repository.nodes">
       <node category-path="/processmining/io" factory-class="org.pm4kinme.node.io.read.XLogReaderNodeFactory" id="org.pm4kinme.node.io.read.XLogReaderNodeFactory"/>
@@ -20,6 +21,8 @@
 
 	<node category-path="/processmining/evaluation" factory-class="org.pm4kinme.node.evaluator.RepairEvaluatorNodeFactory" id="org.pm4kinme.node.evaluator.RepairEvaluatorNodeFactory"/>
 	
+	
+<node category-path="/processmining/manipulation" factory-class="org.pm4knime.node.logmanipulation.SplitLogNodeFactory" id="org.pm4knime.node.logmanipulation.SplitLogNodeFactory"/>
 </extension>
     <extension point="org.knime.core.PortType">
        <portType hidden="false" name="Event Log" objectClass="org.pm4kinme.portobject.XLogPortObject" objectSerializer="org.pm4kinme.portobject.XLogPortObject$XLogPortObjectSerializer" specClass="org.pm4kinme.portobject.XLogPortObjectSpec" specSerializer="org.pm4kinme.portobject.XLogPortObjectSpec$XLogPortObjectSpecSerializer">
