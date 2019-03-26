@@ -1,4 +1,4 @@
-package org.pm4knime.ding.io.processtree.writer;
+package org.pm4knime.node.io.processtree.writer;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +24,8 @@ import org.knime.core.util.FileUtil;
 import org.pm4kinme.portobject.PetriNetPortObjectSpec;
 import org.pm4kinme.portobject.ProcessTreePortObject;
 import org.pm4kinme.portobject.ProcessTreePortObjectSpec;
-import org.pm4knime.ding.io.petrinet.writer.PetrinetWriterNodeDialog;
-import org.pm4knime.ding.io.petrinet.writer.PetrinetWriterNodeModel;
+import org.pm4knime.node.io.petrinet.writer.PetrinetWriterNodeDialog;
+import org.pm4knime.node.io.petrinet.writer.PetrinetWriterNodeModel;
 
 /**
  * This is the model implementation of ProcessTreeWriter.

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<knimeNode icon="./default.png" type="Manipulator" xmlns="http://knime.org/node/v2.8" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://knime.org/node/v2.10 http://knime.org/node/v2.10.xsd">
+    <name>IncorporateNegInfo</name>
+    
+    <shortDescription>
+        This node enhances an existing model by incorporate negative information from actual event log.
+    </shortDescription>
+    
+    <fullDescription>
+        <intro>Improve the model by incorporating negative information</intro>
+        
+        
+        <option name="Exsting Weight">Weight for existing model</option>
+        <option name="Positive Weight">Weight for positive information</option>
+        <option name="Negative Weight">Weight for negative information</option>
+        <!-- possibly more options that can also be grouped by tabs -->
+        <!--
+        <tab name="Standard Options">
+            <option name="short name of first option (like in the dialog)">description of first option</option>
+            <option name="short name of second option (like in the dialog)">description of second option</option>
+        </tab>
+        <tab name="Advanced Options">
+            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
+        </tab>
+        -->
+    </fullDescription>
+    
+    <ports>
+        <inPort index="0" name="Event Log">Event Log as One Input, it includes the positive and negative information</inPort>
+        <inPort index="1" name="Petri Net">An existing Petri net</inPort>
+        <!-- possibly more input ports here-->
+        <outPort index="0" name="Petri Net With LT">Petri Net with LT</outPort>
+        <outPort index="1" name="Petri Net Without LT">Petri Net without LT</outPort>
+        <!-- possibly more output ports here-->
+    </ports>    
+    
+</knimeNode>

@@ -59,8 +59,8 @@ import org.processmining.models.semantics.petrinet.Marking;
  */
 public class RepairEvaluatorNodeModel extends NodeModel {
 	/** The input port 0. */
-    static final int INPORT_PetriNet = 0;
-    static final int INPORT_Log = 1;
+    static final int INPORT_PetriNet = 1;
+    static final int INPORT_Log = 0;
     /** The output port 0: confusion matrix. */
     static final int OUTPORT_CM = 0;
 
@@ -71,6 +71,7 @@ public class RepairEvaluatorNodeModel extends NodeModel {
     int cmRowNum =2;
     int mRowNum =4;
     
+    static int rowID = 0;
     private static String[] CFG_CM_COLUMN_NAMES  =  {"Model Allowed Behaviour", "Model Not Allowed Behaviour"};
     private static String[] CFG_CM_ROW_NAMES = {"Positive Instance","Negative Instance" }; 
     
@@ -84,9 +85,9 @@ public class RepairEvaluatorNodeModel extends NodeModel {
             new DataColumnSpecCreator("Precision", DoubleCell.TYPE).createSpec(),
             new DataColumnSpecCreator("Sensitivity", DoubleCell.TYPE).createSpec(),
             new DataColumnSpecCreator("Specifity", DoubleCell.TYPE).createSpec(),
-            new DataColumnSpecCreator("F-measure", DoubleCell.TYPE).createSpec(),
-            new DataColumnSpecCreator("Accuracy", DoubleCell.TYPE).createSpec(),
-            new DataColumnSpecCreator("Cohen's kappa", DoubleCell.TYPE).createSpec()
+            new DataColumnSpecCreator("F-measure", DoubleCell.TYPE).createSpec()
+            //new DataColumnSpecCreator("Accuracy", DoubleCell.TYPE).createSpec(),
+           // new DataColumnSpecCreator("Cohen's kappa", DoubleCell.TYPE).createSpec()
             };
     /**
      * Constructor for the node model.
@@ -94,7 +95,7 @@ public class RepairEvaluatorNodeModel extends NodeModel {
     protected RepairEvaluatorNodeModel() {
         // TODO: Specify the amount of input and output ports needed.
     	// super(2,2);
-        super(new PortType[] {PetriNetPortObject.TYPE, XLogPortObject.TYPE} , new PortType[] {BufferedDataTable.TYPE, BufferedDataTable.TYPE});
+        super(new PortType[] {XLogPortObject.TYPE, PetriNetPortObject.TYPE} , new PortType[] {BufferedDataTable.TYPE, BufferedDataTable.TYPE});
     }
 
     /**
@@ -135,8 +136,8 @@ public class RepairEvaluatorNodeModel extends NodeModel {
     	
     	int tp = confusion_matrix[0][0]; // true positives
         int fp = confusion_matrix[0][1]; // false positives
-        int tn = confusion_matrix[1][0]; // true negatives
-        int fn = confusion_matrix[1][1]; // false negatives
+        int tn = confusion_matrix[1][1]; // true negatives
+        int fn = confusion_matrix[1][0]; // false negatives
     	
         final DataCell sensitivity; // TP / (TP + FN)
         DoubleCell recall = null; // TP / (TP + FN)
@@ -164,12 +165,13 @@ public class RepairEvaluatorNodeModel extends NodeModel {
         } else {
             fmeasure = DataType.getMissingCell();
         }
+        // I forget to get the accuracy and other measurements, I could add them here..
         
         DataRow m_row =
-                new DefaultRow(new RowKey("Quality Measures"), new DataCell[]{new IntCell(tp), new IntCell(fp),
+                new DefaultRow(new RowKey("Quality Measurement"), new DataCell[]{new IntCell(tp), new IntCell(fp),
                     new IntCell(tn), new IntCell(fn), recall == null ? DataType.getMissingCell() : recall,
-                    prec == null ? DataType.getMissingCell() : prec, sensitivity, specificity, fmeasure,
-                    		DataType.getMissingCell(), DataType.getMissingCell()});
+                    prec == null ? DataType.getMissingCell() : prec, sensitivity, specificity, fmeasure
+                    		/*DataType.getMissingCell(), DataType.getMissingCell()*/});
         
         m_container.addRowToTable(m_row);
         m_container.close();

@@ -1,4 +1,4 @@
-package org.pm4knime.ding.inductiveminer;
+package org.pm4knime.node.discovery.inductiveminer;
 
 import java.io.File;
 import java.io.IOException;

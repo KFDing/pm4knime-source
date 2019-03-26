@@ -1,24 +1,24 @@
-package org.pm4knime.node.io.petrinet.writer;
+package org.pm4kinme.node.enhancement.repairmodel;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeFactory</code> for the "PetrinetWriter" Node.
- * Write Petri net into file to implement the serialization.
+ * <code>NodeFactory</code> for the "RepairModel" Node.
+ * Wrapped Repair Model from Dirk Fahland
  *
- * @author 
+ * @author Kefang Ding
  */
-public class PetrinetWriterNodeFactory 
-        extends NodeFactory<PetrinetWriterNodeModel> {
+public class RepairModelNodeFactory 
+        extends NodeFactory<RepairModelNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public PetrinetWriterNodeModel createNodeModel() {
-        return new PetrinetWriterNodeModel();
+    public RepairModelNodeModel createNodeModel() {
+        return new RepairModelNodeModel();
     }
 
     /**
@@ -33,8 +33,8 @@ public class PetrinetWriterNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<PetrinetWriterNodeModel> createNodeView(final int viewIndex,
-            final PetrinetWriterNodeModel nodeModel) {
+    public NodeView<RepairModelNodeModel> createNodeView(final int viewIndex,
+            final RepairModelNodeModel nodeModel) {
         return null;
     }
 
@@ -51,7 +51,7 @@ public class PetrinetWriterNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new PetrinetWriterNodeDialog();
+        return new RepairModelNodeDialog();
     }
 
 }

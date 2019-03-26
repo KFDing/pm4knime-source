@@ -1,4 +1,4 @@
-package org.pm4knime.ding.io.petrinet.writer;
+package org.pm4knime.node.io.petrinet.writer;
 
 import java.io.IOException;
 import java.net.URISyntaxException;

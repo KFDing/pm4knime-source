@@ -1,4 +1,4 @@
-package org.pm4knime.ding.inductiveminer;
+package org.pm4knime.node.discovery.inductiveminer;
 
 import org.knime.core.node.NodeView;
 

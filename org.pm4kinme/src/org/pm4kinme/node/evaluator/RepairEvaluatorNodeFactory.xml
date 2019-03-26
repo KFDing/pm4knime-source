@@ -12,8 +12,8 @@
     </fullDescription>
     
     <ports>
-        <inPort index="0" name="Petri net Inport">Petri net inport</inPort>
-        <inPort index="1" name="Log Inport">XLog inport</inPort>
+        <inPort index="0" name="Log Inport">XLog inport</inPort>
+        <inPort index="1" name="Petri net Inport">Petri net inport</inPort>
         
         <!-- possibly more input ports here-->
         <outPort index="0" name="Confusion Matrix">Output of Confusion Matrix</outPort>

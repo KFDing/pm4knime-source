@@ -1,4 +1,4 @@
-package org.pm4knime.ding.io.petrinet.reader;
+package org.pm4knime.node.io.petrinet.reader;
 
 import org.knime.core.node.NodeView;
 

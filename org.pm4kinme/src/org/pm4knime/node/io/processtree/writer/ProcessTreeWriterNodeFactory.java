@@ -1,4 +1,4 @@
-package org.pm4knime.ding.io.processtree.writer;
+package org.pm4knime.node.io.processtree.writer;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;

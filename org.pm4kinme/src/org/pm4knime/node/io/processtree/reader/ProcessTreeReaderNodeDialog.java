@@ -1,4 +1,4 @@
-package org.pm4knime.ding.io.processtree.reader;
+package org.pm4knime.node.io.processtree.reader;
 
 import javax.swing.JFileChooser;
 

@@ -1,4 +1,4 @@
-package org.pm4knime.ding.io.processtree.reader;
+package org.pm4knime.node.io.processtree.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import org.knime.core.node.util.CheckUtils;
 import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
 import org.pm4kinme.portobject.ProcessTreePortObject;
 import org.pm4kinme.portobject.ProcessTreePortObjectSpec;
-import org.pm4knime.ding.io.petrinet.reader.PetrinetReaderNodeModel;
+import org.pm4knime.node.io.petrinet.reader.PetrinetReaderNodeModel;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.processtree.ptml.Ptml;
 import org.processmining.processtree.ptml.importing.PtmlImportTree;
