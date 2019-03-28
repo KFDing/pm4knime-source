@@ -1,4 +1,4 @@
-package org.pm4kinme.portobject;
+package org.pm4kinme.portobject.processtree;
 
 import javax.swing.JComponent;
 

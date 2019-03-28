@@ -1,4 +1,4 @@
-package org.pm4kinme.portobject;
+package org.pm4kinme.portobject.petrinet;
 
 import javax.swing.JComponent;
 

@@ -1,4 +1,4 @@
-package org.pm4kinme.portobject;
+package org.pm4kinme.portobject.petrinet;
 
 
 import java.util.Collection;
@@ -155,13 +155,14 @@ public class PetriNetPortObject implements PortObject {
 	 */
 	public String toPnmlString() {
 		
-		try {
+		try {// mark there, we might use another way to do it !! It causes the background error
 			initMarking = context.tryToFindOrConstructFirstObject(Marking.class, InitialMarkingConnection.class,
 					InitialMarkingConnection.MARKING, net);
 		} catch (ConnectionCannotBeObtained e) {
 			// use empty marking\
 			initMarking = new Marking();
 		}
+		
 		Collection<Marking> finalMarkings = new HashSet<Marking>();
 		try {
 			Collection<FinalMarkingConnection> connections = context.getConnectionManager().getConnections(
@@ -171,7 +172,7 @@ public class PetriNetPortObject implements PortObject {
 			}
 		} catch (ConnectionCannotBeObtained e) {
 		}
-
+		
 		GraphLayoutConnection layout;
 		try {
 			layout = context.getConnectionManager().getFirstConnection(GraphLayoutConnection.class, context, net);

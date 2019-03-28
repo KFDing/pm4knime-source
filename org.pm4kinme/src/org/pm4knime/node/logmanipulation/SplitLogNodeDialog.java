@@ -25,7 +25,7 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObject;
 import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
-import org.pm4kinme.portobject.XLogPortObject;
+import org.pm4kinme.portobject.xlog.XLogPortObject;
 import org.processmining.contexts.uitopia.UIPluginContext;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.collection.AlphanumComparator;

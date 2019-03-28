@@ -6,6 +6,12 @@ package org.pm4kinme;
 
 import org.eclipse.core.runtime.Plugin;
 import org.osgi.framework.BundleContext;
+import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
+import org.pm4kinme.external.connectors.prom.PM4KNIMEPackageDescriptor;
+import org.pm4kinme.external.connectors.prom.PM4KNIMEPluginContext;
+import org.pm4kinme.external.connectors.prom.PM4KNIMEPluginManager;
+import org.processmining.framework.packages.PackageDescriptor;
+import org.processmining.framework.plugin.PluginManager;
 
 /**
  * This is the eclipse bundle activator.
@@ -37,9 +43,13 @@ public class PM4KNIMENodePlugin extends Plugin {
     @Override
     public void start(final BundleContext context) throws Exception {
         super.start(context);
-
+        
+        // to add similar stuff like RapidMiner 
+        
+        
     }
 
+    
     /**
      * This method is called when the plug-in is stopped.
      * 

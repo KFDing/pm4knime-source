@@ -10,7 +10,7 @@
         <category level-id="enhancement" name="Enhancement" path="/processmining"/>
    </extension>
    <extension point="org.knime.workbench.repository.nodes">
-      <node category-path="/processmining/io" factory-class="org.pm4kinme.node.io.log.read.XLogReaderNodeFactory" id="org.pm4kinme.node.io.read.XLogReaderNodeFactory"/>
+      <node category-path="/processmining/io" factory-class="org.pm4kinme.node.io.log.reader.XLogReaderNodeFactory" id="org.pm4kinme.node.io.read.XLogReaderNodeFactory"/>
        <node category-path="/processmining/io" factory-class="org.pm4knime.node.io.petrinet.reader.PetrinetReaderNodeFactory" id="org.pm4knime.ding.io.PetrinetReaderNodeFactory"/>  
        
       <node category-path="/processmining/io" factory-class="org.pm4knime.node.io.petrinet.writer.PetrinetWriterNodeFactory" id="org.pm4knime.ding.io.PetrinetWriterNodeFactory"/>  
@@ -28,13 +28,15 @@
 
 <node category-path="processmining/enhancement" factory-class="org.pm4kinme.node.enhancement.incorporatenegativeinformation.IncorporateNegInfoNodeFactory" id="org.pm4kinme.node.enhancement.incorporatenegativeinformation.IncorporateNegInfoNodeFactory"/>
 <node category-path="/processmining/enhancement" factory-class="org.pm4kinme.node.enhancement.repairmodel.RepairModelNodeFactory" id="org.pm4kinme.node.enhancement.repairmodel.RepairModelNodeFactory"/>
+<node category-path="/processmining/io" factory-class="org.pm4kinme.node.io.log.writer.XLogWriterNodeFactory" id="org.pm4kinme.node.io.log.writer.XLogWriterNodeFactory"/>
+<node category-path="/processmining/manipulation" factory-class="org.pm4knime.node.logmanipulation.sample.SampleLogNodeFactory" id="org.pm4knime.node.logmanipulation.sample.SampleLogNodeFactory"/>
 </extension>
     <extension point="org.knime.core.PortType">
-       <portType hidden="false" name="Event Log" objectClass="org.pm4kinme.portobject.XLogPortObject" objectSerializer="org.pm4kinme.portobject.XLogPortObject$XLogPortObjectSerializer" specClass="org.pm4kinme.portobject.XLogPortObjectSpec" specSerializer="org.pm4kinme.portobject.XLogPortObjectSpec$XLogPortObjectSpecSerializer">
+       <portType hidden="false" name="Event Log" objectClass="org.pm4kinme.portobject.xlog.XLogPortObject" objectSerializer="org.pm4kinme.portobject.xlog.XLogPortObject$XLogPortObjectSerializer" specClass="org.pm4kinme.portobject.xlog.XLogPortObjectSpec" specSerializer="org.pm4kinme.portobject.xlog.XLogPortObjectSpec$XLogPortObjectSpecSerializer">
        </portType>
-       <portType hidden="false" name="Petri Net" objectClass="org.pm4kinme.portobject.PetriNetPortObject" objectSerializer="org.pm4kinme.portobject.PetriNetPortObjectSerializer" specClass="org.pm4kinme.portobject.PetriNetPortObjectSpec" specSerializer="org.pm4kinme.portobject.PetriNetPortObjectSpec$PetriNetPortObjectSpecSerializer">
+       <portType hidden="false" name="Petri Net" objectClass="org.pm4kinme.portobject.petrinet.PetriNetPortObject" objectSerializer="org.pm4kinme.portobject.petrinet.PetriNetPortObjectSerializer" specClass="org.pm4kinme.portobject.petrinet.PetriNetPortObjectSpec" specSerializer="org.pm4kinme.portobject.petrinet.PetriNetPortObjectSpec$PetriNetPortObjectSpecSerializer">
        </portType>
-       <portType hidden="false" name="Process Tree" objectClass="org.pm4kinme.portobject.ProcessTreePortObject" objectSerializer="org.pm4kinme.portobject.ProcessTreePortObjectSerializer" specClass="org.pm4kinme.portobject.ProcessTreePortObjectSpec" specSerializer="org.pm4kinme.portobject.ProcessTreePortObjectSpecSerializer">
+       <portType hidden="false" name="Process Tree" objectClass="org.pm4kinme.portobject.processtree.ProcessTreePortObject" objectSerializer="org.pm4kinme.portobject.processtree.ProcessTreePortObjectSerializer" specClass="org.pm4kinme.portobject.processtree.ProcessTreePortObjectSpec" specSerializer="org.pm4kinme.portobject.processtree.ProcessTreePortObjectSpecSerializer">
        </portType>
     </extension>
 </plugin>

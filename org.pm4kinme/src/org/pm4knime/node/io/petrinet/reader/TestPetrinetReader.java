@@ -4,7 +4,7 @@ import java.io.File;
 
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
-import org.pm4kinme.portobject.PetriNetPortObject;
+import org.pm4kinme.portobject.petrinet.PetriNetPortObject;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.semantics.petrinet.Marking;

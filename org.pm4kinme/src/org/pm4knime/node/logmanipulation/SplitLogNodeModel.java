@@ -28,9 +28,9 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
-import org.pm4kinme.portobject.XLogPortObject;
-import org.pm4kinme.portobject.XLogPortObjectSpec;
-import org.pm4kinme.portobject.XLogPortObjectSpecCreator;
+import org.pm4kinme.portobject.xlog.XLogPortObject;
+import org.pm4kinme.portobject.xlog.XLogPortObjectSpec;
+import org.pm4kinme.portobject.xlog.XLogPortObjectSpecCreator;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.collection.AlphanumComparator;
 import org.processmining.incorporatenegativeinformation.models.AttributeLogFilter;
@@ -97,6 +97,7 @@ public class SplitLogNodeModel extends NodeModel {
     }
 
     private AttributeLogFilter createFilter() {
+    	
     	AttributeLogFilter filter = new AttributeLogFilter();
     	filter.setFilterOn(m_filterOn.getStringValue());
     	filter.setAttributeKey(m_attributeKey.getStringValue());
@@ -116,7 +117,7 @@ public class SplitLogNodeModel extends NodeModel {
             final ExecutionContext exec) throws Exception {
 
         // TODO: Return split event log from them
-    	
+    	logger.info("Begin to Split the Event Log");
     	// assign the log
     	XLogPortObject logPortObject = (XLogPortObject) inData[0];
 		log = logPortObject.getLog();
@@ -136,7 +137,7 @@ public class SplitLogNodeModel extends NodeModel {
     	//logname = XConceptExtension.instance().extractName(logs[1]);
     	//m_outSpecs[1].setTitle(logname + " Spec");
     	lp2dispose.setSpec(m_outSpecs[1]);
-    	
+    	logger.info("End Node Split the Event Log");
         return new PortObject[]{lp2keep, lp2dispose };
     }
 

@@ -1,4 +1,4 @@
-package org.pm4kinme.portobject;
+package org.pm4kinme.portobject.xlog;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -107,6 +107,7 @@ public class XLogPortObject extends AbstractPortObject {
 
 	public static class XLogPortObjectSerializer
 			extends AbstractPortObject.AbstractPortObjectSerializer<XLogPortObject> {
+		
 	}
 
 }

@@ -1,4 +1,4 @@
-package org.pm4kinme.portobject;
+package org.pm4kinme.portobject.xlog;
 
 import java.util.Collection;
 import java.util.List;

@@ -19,10 +19,14 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
-import org.pm4kinme.portobject.PetriNetPortObject;
-import org.pm4kinme.portobject.PetriNetPortObjectSpec;
-import org.pm4kinme.portobject.XLogPortObject;
-import org.pm4kinme.portobject.XLogPortObjectSpec;
+import org.pm4kinme.external.connectors.prom.PM4KNIMEPluginDescriptor;
+import org.pm4kinme.external.connectors.prom.PM4KNIMEPluginManager;
+import org.pm4kinme.portobject.petrinet.PetriNetPortObject;
+import org.pm4kinme.portobject.petrinet.PetriNetPortObjectSpec;
+import org.pm4kinme.portobject.xlog.XLogPortObject;
+import org.pm4kinme.portobject.xlog.XLogPortObjectSpec;
+import org.processmining.framework.packages.PackageDescriptor;
+import org.processmining.framework.packages.PackageManager;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.incorporatenegativeinformation.help.NetUtilities;
 import org.processmining.modelrepair.parameters.RepairConfiguration;
@@ -31,6 +35,8 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.semantics.petrinet.Marking;
 import org.processmining.plugins.ilpminer.ILPMiner;
 import org.processmining.plugins.log.exporting.ExportLogXes;
+import org.processmining.plugins.log.logabstraction.LogRelationProvider;
+import org.processmining.yawl.ext.javax.persistence.criteria.Predicate.BooleanOperator;
 
 /**
  * This is the model implementation of RepairModel.
@@ -98,14 +104,17 @@ public class RepairModelNodeModel extends NodeModel {
     		// need to change the codes later
     		Marking finalMarking = NetUtilities.guessFinalMarking(inNetData.getNet());
     		inNetData.setFinalMarking(finalMarking);
+    	
     	}
+    	
+    	prepareEnv();
     	
     	// get the repair configuration parameters
     	RepairConfiguration config = createRepairConfig();
     	// input into the codes
     	PluginContext context =  PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(Uma_RepairModel_Plugin.class);
-    	PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(ExportLogXes.class);
-    	PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(ILPMiner.class);
+    	
+    	// PackageManager.getInstance().findOrInstallPackages(packageNames)
     	Uma_RepairModel_Plugin repairer = new Uma_RepairModel_Plugin();
     	Object[] result = repairer.repairModel_buildT2Econnection(context, logPortData.getLog(),
     			inNetData.getNet(), inNetData.getInitMarking(), inNetData.getFinalMarking(), config, classifier);
@@ -119,6 +128,18 @@ public class RepairModelNodeModel extends NodeModel {
         return new PortObject[]{outNetObject};
     }
 
+    private void prepareEnv() {
+    	String url = "/home/dkf/ProcessMining/programs/KNIME_Development/PM4KNIME/pm4knime-lib";
+    	
+    	// ClassLoader sysloader = ClassLoader.getSystemClassLoader();
+    	org.processmining.framework.boot.Boot.PACKAGE_FOLDER = url;
+    	PackageManager.getInstance().initialize(org.processmining.framework.boot.Boot.Level.ALL);
+    	
+    	PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(LogRelationProvider.class);
+    	PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(ILPMiner.class);
+    	
+    }
+    
     private RepairConfiguration createRepairConfig() {
 		// TODO Auto-generated method stub
     	RepairConfiguration config =  new RepairConfiguration();

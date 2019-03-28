@@ -1,4 +1,4 @@
-package org.pm4kinme.node.io.log.read;
+package org.pm4kinme.node.io.log.reader;
 
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentFileChooser;

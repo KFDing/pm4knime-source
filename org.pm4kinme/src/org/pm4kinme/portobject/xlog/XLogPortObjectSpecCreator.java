@@ -1,4 +1,4 @@
-package org.pm4kinme.portobject;
+package org.pm4kinme.portobject.xlog;
 /**
  * this class is used to create PortObject for XLog, which should connect the PortOject information
  * @author KFDing

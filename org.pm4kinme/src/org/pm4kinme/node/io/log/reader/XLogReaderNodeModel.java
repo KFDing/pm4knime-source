@@ -1,4 +1,4 @@
-package org.pm4kinme.node.io.log.read;
+package org.pm4kinme.node.io.log.reader;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,9 +22,9 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
 import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
-import org.pm4kinme.portobject.XLogPortObject;
-import org.pm4kinme.portobject.XLogPortObjectSpec;
-import org.pm4kinme.portobject.XLogPortObjectSpecCreator;
+import org.pm4kinme.portobject.xlog.XLogPortObject;
+import org.pm4kinme.portobject.xlog.XLogPortObjectSpec;
+import org.pm4kinme.portobject.xlog.XLogPortObjectSpecCreator;
 import org.pm4kinme.settingsmodel.XLogReaderNodeSettingsModel;
 import org.processmining.plugins.log.OpenNaiveLogFilePlugin;
 
