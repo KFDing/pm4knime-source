@@ -25,7 +25,7 @@ import org.pm4kinme.portobject.xlog.XLogPortObject;
 import org.pm4kinme.portobject.xlog.XLogPortObjectSpec;
 import org.pm4kinme.portobject.xlog.XLogPortObjectSpecCreator;
 import org.pm4knime.node.discovery.inductiveminer.InductiveMinerNodeModel;
-import org.pm4knime.node.logmanipulation.SplitLogNodeModel;
+import org.pm4knime.node.logmanipulation.split.SplitLogNodeModel;
 import org.processmining.incorporatenegativeinformation.help.EventLogUtilities;
 
 import javassist.tools.reflect.Sample;

@@ -1,4 +1,4 @@
-package org.pm4knime.node.logmanipulation;
+package org.pm4knime.node.logmanipulation.split;
 
 import java.io.File;
 import java.io.IOException;

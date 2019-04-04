@@ -151,10 +151,11 @@ public class InductiveMinerNodeModel extends NodeModel {
         	throw new InvalidSettingsException("unknown inductive miner type "+ m_type.getStringValue());
         param.setNoiseThreshold((float) m_noiseThreshold.getDoubleValue());
         // we need to give one of the classifier to have it
+        /*
         if(m_classifier.isEnabled()) {
         	param.setClassifier(map.get(m_classifier.getStringValue()));
         }
-    	
+    	*/
         return param;
     } 
     

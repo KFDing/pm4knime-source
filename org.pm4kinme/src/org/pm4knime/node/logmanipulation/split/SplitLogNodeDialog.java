@@ -1,4 +1,4 @@
-package org.pm4knime.node.logmanipulation;
+package org.pm4knime.node.logmanipulation.split;
 
 import java.util.ArrayList;
 import java.util.List;

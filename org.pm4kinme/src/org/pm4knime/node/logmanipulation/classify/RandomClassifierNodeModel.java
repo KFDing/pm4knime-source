@@ -16,6 +16,7 @@ import org.knime.core.node.NodeModel;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelDoubleBounded;
+import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
@@ -33,10 +34,16 @@ import org.processmining.incorporatenegativeinformation.models.TraceVariant;
  * @author Kefang Ding
  */
 public class RandomClassifierNodeModel extends NodeModel {
-    
+	
+	public static final String CFG_ATTRIBUTE_KEY = "class key";
+	
 	public static final String CFG_OVERLAP_RATE = "OverLapRate";
     
 	public static final String CFG_POS_RATE = "Positive Rate";
+	
+	static SettingsModelString createSettingsModelAttributeKey() {
+	    return new SettingsModelString(CFG_ATTRIBUTE_KEY, "");
+	} 
 	
 	static SettingsModelDoubleBounded createSettingsModelOverlapRate() {
 	    return new SettingsModelDoubleBounded(CFG_OVERLAP_RATE, 0,0,1.0 );
@@ -45,7 +52,7 @@ public class RandomClassifierNodeModel extends NodeModel {
 	static SettingsModelDoubleBounded createSettingsModelPosRate() {
 	    return new SettingsModelDoubleBounded(CFG_POS_RATE, 0,0,1.0 );
 	}   
-	
+	SettingsModelString m_attributeKey = createSettingsModelAttributeKey();
 	SettingsModelDoubleBounded m_overlapRate = createSettingsModelOverlapRate();
 	SettingsModelDoubleBounded m_posRate = createSettingsModelPosRate();
 	
@@ -79,7 +86,7 @@ public class RandomClassifierNodeModel extends NodeModel {
     	XFactory factory = XFactoryRegistry.instance().currentDefault();
 		XLog label_log = (XLog)logPortObject.getLog().clone();
 		// how to decide the throughputtime of each trace?? 
-		label_log.getGlobalTraceAttributes().add(factory.createAttributeBoolean(Configuration.POS_LABEL, false, null));
+		label_log.getGlobalTraceAttributes().add(factory.createAttributeBoolean(m_attributeKey.getStringValue(), false, null));
 		
 		List<TraceVariant> variants = EventLogUtilities.getTraceVariants(label_log);
 		EventLogUtilities.assignVariantListLabel(variants, m_overlapRate.getDoubleValue(), m_posRate.getDoubleValue());
@@ -98,6 +105,7 @@ public class RandomClassifierNodeModel extends NodeModel {
     @Override
     protected void reset() {
         // TODO: generated method stub
+    	m_attributeKey.setStringValue("");
     	m_overlapRate.setDoubleValue(0);
     	m_posRate.setDoubleValue(0);
     }
@@ -125,6 +133,8 @@ public class RandomClassifierNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
          // TODO: generated method stub
+    	m_attributeKey.saveSettingsTo(settings);
+    	
     	m_overlapRate.saveSettingsTo(settings);
     	m_posRate.saveSettingsTo(settings);
     }
@@ -136,6 +146,8 @@ public class RandomClassifierNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         // TODO: generated method stub
+    	m_attributeKey.loadSettingsFrom(settings);
+    	
     	m_overlapRate.loadSettingsFrom(settings);
     	m_posRate.loadSettingsFrom(settings);
     }
@@ -147,6 +159,8 @@ public class RandomClassifierNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         // TODO: generated method stub
+    	m_attributeKey.validateSettings(settings);
+    	
     	m_overlapRate.validateSettings(settings);
     	m_posRate.validateSettings(settings);
     }

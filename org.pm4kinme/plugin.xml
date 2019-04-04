@@ -23,13 +23,14 @@
 	<node category-path="/processmining/evaluation" factory-class="org.pm4kinme.node.evaluator.RepairEvaluatorNodeFactory" id="org.pm4kinme.node.evaluator.RepairEvaluatorNodeFactory"/>
 	
 	
-<node category-path="/processmining/manipulation" factory-class="org.pm4knime.node.logmanipulation.SplitLogNodeFactory" id="org.pm4knime.node.logmanipulation.SplitLogNodeFactory"/>
+<node category-path="/processmining/manipulation" factory-class="org.pm4knime.node.logmanipulation.split.SplitLogNodeFactory" id="org.pm4knime.node.logmanipulation.SplitLogNodeFactory"/>
 <node category-path="/processmining/manipulation" factory-class="org.pm4knime.node.logmanipulation.classify.RandomClassifierNodeFactory" id="org.pm4knime.node.logmanipulation.classify.RandomClassifierNodeFactory"/>
 
 <node category-path="processmining/enhancement" factory-class="org.pm4kinme.node.enhancement.incorporatenegativeinformation.IncorporateNegInfoNodeFactory" id="org.pm4kinme.node.enhancement.incorporatenegativeinformation.IncorporateNegInfoNodeFactory"/>
 <node category-path="/processmining/enhancement" factory-class="org.pm4kinme.node.enhancement.repairmodel.RepairModelNodeFactory" id="org.pm4kinme.node.enhancement.repairmodel.RepairModelNodeFactory"/>
 <node category-path="/processmining/io" factory-class="org.pm4kinme.node.io.log.writer.XLogWriterNodeFactory" id="org.pm4kinme.node.io.log.writer.XLogWriterNodeFactory"/>
 <node category-path="/processmining/manipulation" factory-class="org.pm4knime.node.logmanipulation.sample.SampleLogNodeFactory" id="org.pm4knime.node.logmanipulation.sample.SampleLogNodeFactory"/>
+<node category-path="/processmining/manipulation" factory-class="org.pm4knime.node.logmanipulation.split2.LogSplitterNodeFactory" id="org.pm4knime.node.logmanipulation.split2.LogSplitterNodeFactory"/>
 </extension>
     <extension point="org.knime.core.PortType">
        <portType hidden="false" name="Event Log" objectClass="org.pm4kinme.portobject.xlog.XLogPortObject" objectSerializer="org.pm4kinme.portobject.xlog.XLogPortObject$XLogPortObjectSerializer" specClass="org.pm4kinme.portobject.xlog.XLogPortObjectSpec" specSerializer="org.pm4kinme.portobject.xlog.XLogPortObjectSpec$XLogPortObjectSpecSerializer">

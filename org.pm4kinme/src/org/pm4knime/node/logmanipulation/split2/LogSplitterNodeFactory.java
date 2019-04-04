@@ -1,24 +1,24 @@
-package org.pm4knime.node.logmanipulation;
+package org.pm4knime.node.logmanipulation.split2;
 
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
 
 /**
- * <code>NodeFactory</code> for the "SplitLog" Node.
- * This node split one event log according to chosen attribute value, or group them together according to attribute value
+ * <code>NodeFactory</code> for the "LogSplitter" Node.
+ * This log splitter is independent on the event log... we just give the choices , in benefit to use flowVariables
  *
- * @author Kefang Ding
+ * @author Kefang
  */
-public class SplitLogNodeFactory 
-        extends NodeFactory<SplitLogNodeModel> {
+public class LogSplitterNodeFactory 
+        extends NodeFactory<LogSplitterNodeModel> {
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public SplitLogNodeModel createNodeModel() {
-        return new SplitLogNodeModel();
+    public LogSplitterNodeModel createNodeModel() {
+        return new LogSplitterNodeModel();
     }
 
     /**
@@ -33,8 +33,8 @@ public class SplitLogNodeFactory
      * {@inheritDoc}
      */
     @Override
-    public NodeView<SplitLogNodeModel> createNodeView(final int viewIndex,
-            final SplitLogNodeModel nodeModel) {
+    public NodeView<LogSplitterNodeModel> createNodeView(final int viewIndex,
+            final LogSplitterNodeModel nodeModel) {
         return null;
     }
 
@@ -51,7 +51,7 @@ public class SplitLogNodeFactory
      */
     @Override
     public NodeDialogPane createNodeDialogPane() {
-        return new SplitLogNodeDialog();
+        return new LogSplitterNodeDialog();
     }
 
 }

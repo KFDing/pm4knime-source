@@ -31,11 +31,10 @@ import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetImpl;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
 import org.processmining.framework.plugin.PluginContext;
-import org.processmining.incorporatenegativeinformation.algorithms.IncorporateNeg2Dfg;
 import org.processmining.incorporatenegativeinformation.algorithms.NewLTDetector;
 import org.processmining.incorporatenegativeinformation.algorithms.NewXORPairGenerator;
 import org.processmining.incorporatenegativeinformation.algorithms.PN2DfgTransform;
-import org.processmining.incorporatenegativeinformation.help.ProcessConfiguration;
+import org.processmining.incorporatenegativeinformation.help.EventLogUtilities;
 import org.processmining.incorporatenegativeinformation.models.DfMatrix;
 import org.processmining.incorporatenegativeinformation.models.DfgProcessResult;
 import org.processmining.incorporatenegativeinformation.models.LTRule;
@@ -82,7 +81,9 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
 			"Inductive Miner - Incompleteness" //
 			// "Inductive Miner - exhaustive K-successor"
 	};
-
+	public static final String CFG_ATTRIBUTE_KEY = "split attribute key";
+	public static final String CFG_ATTRIBUTE_VALUE = "split attribute value";
+	
 	public static final String CFGKEY_IM_TYPE = "InductiveMinerMethod";
 	public static final String CFGKEY_IM_NOISE_THRESHOLD = "NoiseThreshold";
 	public static final String CFGKEY_CLASSIFIER = "classifier";
@@ -93,7 +94,8 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
 	public static final int CFGKEY_POS_WEIGHT_IDX = 1;
 	public static final int CFGKEY_NEG_WEIGHT_IDX = 2;
 	
-	
+	SettingsModelString m_attributeKey = new SettingsModelString(CFG_ATTRIBUTE_KEY, "");
+	SettingsModelString m_attributeValue = new SettingsModelString(CFG_ATTRIBUTE_VALUE, "");
 	
 	SettingsModelDoubleBounded m_extWeight = new SettingsModelDoubleBounded(
 			IncorporateNegInfoNodeModel.CFGKEY_EXT_WEIGHT, 1, 0, 1);
@@ -107,7 +109,7 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
 
 	private SettingsModelDoubleBounded m_noiseThreshold = new SettingsModelDoubleBounded(InductiveMinerNodeModel.CFGKEY_NOISE_THRESHOLD, 0.0, 0, 1.0);
 	// we decide to use the XEventNameClassifier, so not as one option!!! 
-	static XEventClassifier classifier = new XEventNameClassifier();
+	static XEventClassifier classifier ;
 	static DfgProcessResult dfgResult;
 	private PetriNetPortObjectSpec [] pnSpecs = new PetriNetPortObjectSpec[getNrOutPorts()];
     /**
@@ -227,16 +229,19 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
 		int num = XLogInfoFactory.createLogInfo(log).getNumberOfTraces();
 		// PN2DfgTransform.setCardinality(dfg, num);
 		// -- incorporate the negative information and give out the Dfg and Petri net model
-		Object[] result = IncorporateNeg2Dfg.splitEventLog(log);
+		// here we should also set the pos key and value on it for the configuration part..
+		// look at the split mode, do it later
+		Object[] result = EventLogUtilities.splitLog(log, m_attributeKey.getStringValue(), m_attributeValue.getStringValue());
 		XLog pos_log = (XLog) result[0];
 		XLog neg_log = (XLog) result[1];
-		
-		Dfg pos_dfg = Log2DfgTransformer.transform(pos_log, this.classifier);
-		Dfg neg_dfg = Log2DfgTransformer.transform(neg_log, this.classifier);
+		if(classifier == null)
+			classifier = new XEventNameClassifier();
+		Dfg pos_dfg = Log2DfgTransformer.transform(pos_log, classifier);
+		Dfg neg_dfg = Log2DfgTransformer.transform(neg_log, classifier);
 		// one bug in KNIME could not find  transition system
 		// Execute failed: org/processmining/models/graphbased/directed/transitionsystem/TransitionSystem
 		Dfg dfg = PN2DfgTransform.transformPN2Dfg(context, net, marking);
-		DfMatrix dfMatrix = IncorporateNeg2Dfg.createDfMatrix(dfg, pos_dfg, neg_dfg, num);
+		DfMatrix dfMatrix = DfMatrix.createDfMatrix(dfg, pos_dfg, neg_dfg, num);
 		
     	return dfMatrix;
     }
@@ -277,6 +282,9 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
          // TODO: save the parameters here
+    	m_attributeKey.saveSettingsTo(settings);
+    	m_attributeValue.saveSettingsTo(settings);
+    	
     	m_extWeight.saveSettingsTo(settings);
     	m_posWeight.saveSettingsTo(settings);
     	m_negWeight.saveSettingsTo(settings);
@@ -293,6 +301,9 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         // TODO: generated method stub
+    	m_attributeKey.loadSettingsFrom(settings);
+    	m_attributeValue.loadSettingsFrom(settings);
+    	
     	m_extWeight.loadSettingsFrom(settings);
     	m_posWeight.loadSettingsFrom(settings);
     	m_negWeight.loadSettingsFrom(settings);
@@ -308,6 +319,9 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         // TODO: make sure there is sth data there??
+    	m_attributeKey.validateSettings(settings);
+    	m_attributeValue.validateSettings(settings);
+    	
     	m_extWeight.validateSettings(settings);
     	m_posWeight.validateSettings(settings);
     	m_negWeight.validateSettings(settings);
