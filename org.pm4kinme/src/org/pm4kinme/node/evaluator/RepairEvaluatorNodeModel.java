@@ -83,10 +83,10 @@ public class RepairEvaluatorNodeModel extends NodeModel {
             new DataColumnSpecCreator("FalseNegatives", IntCell.TYPE).createSpec(),
             new DataColumnSpecCreator("Recall", DoubleCell.TYPE).createSpec(),
             new DataColumnSpecCreator("Precision", DoubleCell.TYPE).createSpec(),
-            new DataColumnSpecCreator("Sensitivity", DoubleCell.TYPE).createSpec(),
             new DataColumnSpecCreator("Specifity", DoubleCell.TYPE).createSpec(),
+            new DataColumnSpecCreator("Accuracy", DoubleCell.TYPE).createSpec(),
             new DataColumnSpecCreator("F-measure", DoubleCell.TYPE).createSpec()
-            //new DataColumnSpecCreator("Accuracy", DoubleCell.TYPE).createSpec(),
+            //
            // new DataColumnSpecCreator("Cohen's kappa", DoubleCell.TYPE).createSpec()
             };
     /**
@@ -115,17 +115,18 @@ public class RepairEvaluatorNodeModel extends NodeModel {
         // first to use the plugin to get the confusion matrix
     	
     	List<Integer> result = EvaluateResult.naiveCheckPN(log, net, intialMarking);
-    	
+    	/*
     	int[][] confusion_matrix = new int[cmRowNum][cmColNum];
     	confusion_matrix[0][0] = result.get(Configuration.ALLOWED_POS_IDX);
     	confusion_matrix[0][1] = result.get(Configuration.NOT_ALLOWED_POS_IDX);
     	confusion_matrix[1][0] = result.get(Configuration.ALLOWED_NEG_IDX);
     	confusion_matrix[1][1] = result.get(Configuration.NOT_ALLOWED_NEG_IDX);
+    	*/
     	// generate a table from it 
     	DataTableSpec cmSpec = createOutSpec();
     	BufferedDataContainer cm_container = exec.createDataContainer(cmSpec);
     	for(int i=0; i< cmRowNum; i++) {
-    		DataRow row = new DefaultRow(CFG_CM_ROW_NAMES[i], confusion_matrix[i]);
+    		DataRow row = new DefaultRow(CFG_CM_ROW_NAMES[i], result.get(Configuration.ALLOWED_POS_IDX), result.get(Configuration.NOT_ALLOWED_POS_IDX));
         	cm_container.addRowToTable(row);	
     	}
         cm_container.close();
@@ -134,30 +135,34 @@ public class RepairEvaluatorNodeModel extends NodeModel {
     	// after this we need to get the measurements, reuse, please reuse!!
     	BufferedDataContainer m_container = exec.createDataContainer(new DataTableSpec(QUALITY_MEASURES_SPECS));
     	
-    	int tp = confusion_matrix[0][0]; // true positives
-        int fp = confusion_matrix[0][1]; // false positives
-        int tn = confusion_matrix[1][1]; // true negatives
-        int fn = confusion_matrix[1][0]; // false negatives
+    	int tp = result.get(Configuration.ALLOWED_POS_IDX); // true positives
+        int fp = result.get(Configuration.NOT_ALLOWED_POS_IDX); // false positives
+        int tn = result.get(Configuration.NOT_ALLOWED_NEG_IDX); // true negatives
+        int fn = result.get(Configuration.ALLOWED_NEG_IDX); // false negatives
     	
-        final DataCell sensitivity; // TP / (TP + FN)
+       
         DoubleCell recall = null; // TP / (TP + FN)
         if (tp + fn > 0) {
             recall = new DoubleCell(1.0 * tp / (tp + fn));
-            sensitivity = new DoubleCell(1.0 * tp / (tp + fn));
-        } else {
-            sensitivity = DataType.getMissingCell();
-        }
+        } 
         DoubleCell prec = null; // TP / (TP + FP)
         if (tp + fp > 0) {
             prec = new DoubleCell(1.0 * tp / (tp + fp));
         }
-        final DataCell specificity; // TN / (TN + FP)
+        
+        DataCell specificity; // TN / (TN + FP)
         if (tn + fp > 0) {
             specificity = new DoubleCell(1.0 * tn / (tn + fp));
         } else {
             specificity = DataType.getMissingCell();
         }
-        final DataCell fmeasure; // 2 * Prec. * Recall / (Prec. + Recall)
+        DataCell accuracy; // (TP + TN) /(TP +FP + FN + TN)
+        if (tp + fp + fn + tn >0) {
+        	accuracy = new DoubleCell(1.0 * (tp+ tn )/ (tp + fp+ fn + tn));
+        } else {
+        	accuracy = DataType.getMissingCell();
+        }
+        DataCell fmeasure; // 2 * Prec. * Recall / (Prec. + Recall)
         if (recall != null && prec != null) {
             fmeasure =
                 new DoubleCell(2.0 * prec.getDoubleValue() * recall.getDoubleValue()
@@ -170,7 +175,7 @@ public class RepairEvaluatorNodeModel extends NodeModel {
         DataRow m_row =
                 new DefaultRow(new RowKey("Quality Measurement"), new DataCell[]{new IntCell(tp), new IntCell(fp),
                     new IntCell(tn), new IntCell(fn), recall == null ? DataType.getMissingCell() : recall,
-                    prec == null ? DataType.getMissingCell() : prec, sensitivity, specificity, fmeasure
+                    prec == null ? DataType.getMissingCell() : prec, specificity, accuracy, fmeasure
                     		/*DataType.getMissingCell(), DataType.getMissingCell()*/});
         
         m_container.addRowToTable(m_row);

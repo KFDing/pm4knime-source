@@ -28,6 +28,7 @@ import org.pm4kinme.portobject.xlog.XLogPortObject;
 import org.pm4kinme.portobject.xlog.XLogPortObjectSpec;
 import org.pm4knime.node.discovery.inductiveminer.InductiveMinerNodeModel;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
+import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetFactory;
 import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetImpl;
 import org.processmining.framework.connections.ConnectionCannotBeObtained;
 import org.processmining.framework.plugin.PluginContext;
@@ -73,8 +74,9 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
 	private static final int INPORT_LOG = 0;
 	private static final int INPORT_PETRINET = 1;
 	
-	private static final int OUTPORT_PETRINET_WITHLT = 0;
-	private static final int OUTPORT_PETRINET_WITHOUTLT = 1;
+	private static final int OUTPORT_REDUCED_PETRINET_WITHLT = 0;
+	private static final int OUTPORT_PETRINET_WITHLT = 1;
+	private static final int OUTPORT_PETRINET_WITHOUTLT = 2;
 	public static final String[] defaultType = new String[] {
 			"Inductive Miner", //
 			"Inductive Miner - Infrequent", //
@@ -106,8 +108,7 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
 	
 	
 	private SettingsModelString m_type =  new SettingsModelString(InductiveMinerNodeModel.CFGKEY_METHOD_TYPE, defaultType[0]);
-
-	private SettingsModelDoubleBounded m_noiseThreshold = new SettingsModelDoubleBounded(InductiveMinerNodeModel.CFGKEY_NOISE_THRESHOLD, 0.0, 0, 1.0);
+	private SettingsModelDoubleBounded m_noiseThreshold = new SettingsModelDoubleBounded(CFGKEY_IM_NOISE_THRESHOLD, 0.2, 0, 1.0);
 	// we decide to use the XEventNameClassifier, so not as one option!!! 
 	static XEventClassifier classifier ;
 	static DfgProcessResult dfgResult;
@@ -119,7 +120,7 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
     
         // TODO: Specify the amount of input and output ports needed.
         super(new PortType[] { XLogPortObject.TYPE, PetriNetPortObject.TYPE },
-				new PortType[] { PetriNetPortObject.TYPE, PetriNetPortObject.TYPE });
+				new PortType[] { PetriNetPortObject.TYPE, PetriNetPortObject.TYPE, PetriNetPortObject.TYPE});
     }
 
     /**
@@ -146,21 +147,26 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
     	Dfg dfg = matrix.buildDfg();
     	
     	// 3. generate petri net with and without lt
-    	DfgMiningParameters ptParas = buildProcessTreParameters();
+    	DfgMiningParameters ptParas = buildProcessTreeParameters();
     	ProcessTree pTree = IMdProcessTree.mineProcessTree(dfg, ptParas);
     	// net without lt
     	PetrinetWithMarkings mnet = ProcessTree2Petrinet.convert(pTree, true);
     	AcceptingPetriNet anetWithoutLT = new AcceptingPetriNetImpl(mnet.petrinet, mnet.initialMarking, mnet.finalMarking);
 		// get the net with lt
-		AcceptingPetriNet anetWithLT = createPNWithLT(pTree, log, ctlParas, matrix.getStandardCardinality());
+		AcceptingPetriNet[] resultWithLT = createPNWithLT(pTree, log, ctlParas, matrix.getStandardCardinality());
+		// get reduced Petri net 
+		AcceptingPetriNet anetWithLT = resultWithLT[0];
+		AcceptingPetriNet danetWithLT = resultWithLT[1];
 		
 		// 4. wrap them into the petri net object 
 		PetriNetPortObject[] netPortObjects = new PetriNetPortObject[getNrOutPorts()];
-		netPortObjects[OUTPORT_PETRINET_WITHOUTLT] = new PetriNetPortObject(pnSpecs[OUTPORT_PETRINET_WITHLT]);
-		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setContext(context);
-		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setNet(anetWithoutLT.getNet());
-		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setInitMarking(anetWithoutLT.getInitialMarking());
-		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setFinalMarking(anetWithoutLT.getFinalMarkings());
+		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT] = new PetriNetPortObject(pnSpecs[OUTPORT_REDUCED_PETRINET_WITHLT]);
+		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setContext(context);
+		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setNet(danetWithLT.getNet());
+		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setInitMarking(danetWithLT.getInitialMarking());
+		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setFinalMarking(danetWithLT.getFinalMarkings());
+		
+		
 		
 		netPortObjects[OUTPORT_PETRINET_WITHLT] = new PetriNetPortObject(pnSpecs[OUTPORT_PETRINET_WITHLT]);
 		netPortObjects[OUTPORT_PETRINET_WITHLT].setContext(context);
@@ -168,7 +174,13 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
 		netPortObjects[OUTPORT_PETRINET_WITHLT].setInitMarking(anetWithLT.getInitialMarking());
 		netPortObjects[OUTPORT_PETRINET_WITHLT].setFinalMarking(anetWithLT.getFinalMarkings());
 		
-        return new PortObject[]{netPortObjects[OUTPORT_PETRINET_WITHLT], netPortObjects[OUTPORT_PETRINET_WITHOUTLT] };
+		netPortObjects[OUTPORT_PETRINET_WITHOUTLT] = new PetriNetPortObject(pnSpecs[OUTPORT_PETRINET_WITHLT]);
+		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setContext(context);
+		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setNet(mnet.petrinet);
+		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setInitMarking(mnet.initialMarking);
+		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setFinalMarking(mnet.finalMarking);
+		
+        return netPortObjects;
     }
     
     // what could I do ?? The matrix should stay the same, but due to the parameters they change!! 
@@ -176,26 +188,35 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
     // and then add the long-term dependency!!! 
     // but one thing, is if it worthy to store them here?? 
     // make it to be static, the others should be private
-    private AcceptingPetriNet createPNWithLT(ProcessTree pTree, XLog log, ControlParameters parameters, long num) {
+    private AcceptingPetriNet[] createPNWithLT(ProcessTree pTree, XLog log, ControlParameters parameters, long num) {
 
     	NewXORPairGenerator<ProcessTreeElement> generator = new NewXORPairGenerator<ProcessTreeElement>();
 		generator.initialize(pTree);
 		
 		NewLTDetector detector  = new NewLTDetector(pTree, log, parameters, num);
+		detector.reset(null);
 		// in other mode, we need to define it another function
 		generator.buildAllPairInOrder();
 		List<XORClusterPair<ProcessTreeElement>> clusterPairs = generator.getClusterPair();
 		List<LTRule<XORCluster<ProcessTreeElement>>> connSet = generator.getAllLTConnection();
 		// generate all the pairs here 
-		detector.addLTOnPairList(clusterPairs, connSet);
-		return detector.getAcceptionPN();
+		if(clusterPairs.size()>0)
+			detector.addLTOnPairList(clusterPairs, connSet);
+		else {
+			System.out.println("Not enough xors for long-term dependency");
+		}
+		
+		Petrinet dnet = detector.getReducedPetriNet();
+		AcceptingPetriNet danet = AcceptingPetriNetFactory.createAcceptingPetriNet(dnet);
+		
+		return new AcceptingPetriNet[] {detector.getAcceptionPN(), danet};
 	}
     
     /**
      * according to inductive miner type, we have different dfgMiningParameters, at first we need to test
      * @return
      */
-    private DfgMiningParameters buildProcessTreParameters() {
+    private DfgMiningParameters buildProcessTreeParameters() {
     	DfgMiningParameters parameters = null;
     	if(m_type.getStringValue().equals(defaultType[0])) {
     		parameters = new DfgMiningParametersIMd();
@@ -206,6 +227,8 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
     	}else {
     		System.out.println("not in this type");
     	}
+    	
+    	parameters.setNoiseThreshold((float) m_noiseThreshold.getDoubleValue());
 	    return parameters;
 	   }
 
@@ -226,7 +249,7 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
     
     private DfMatrix createDfMatrix(PluginContext context, XLog log, Petrinet net, Marking marking) throws ConnectionCannotBeObtained {
     	
-		int num = XLogInfoFactory.createLogInfo(log).getNumberOfTraces();
+		// int num = XLogInfoFactory.createLogInfo(log).getNumberOfTraces();
 		// PN2DfgTransform.setCardinality(dfg, num);
 		// -- incorporate the negative information and give out the Dfg and Petri net model
 		// here we should also set the pos key and value on it for the configuration part..
@@ -241,7 +264,7 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
 		// one bug in KNIME could not find  transition system
 		// Execute failed: org/processmining/models/graphbased/directed/transitionsystem/TransitionSystem
 		Dfg dfg = PN2DfgTransform.transformPN2Dfg(context, net, marking);
-		DfMatrix dfMatrix = DfMatrix.createDfMatrix(dfg, pos_dfg, neg_dfg, num);
+		DfMatrix dfMatrix = DfMatrix.createDfMatrix(dfg, pos_dfg, neg_dfg);
 		
     	return dfMatrix;
     }
@@ -266,6 +289,11 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
     	if(!inSpecs[INPORT_PETRINET].getClass().equals(PetriNetPortObjectSpec.class)) 
     		throw new InvalidSettingsException("Input is not a valid petri net!");
     	
+    	// another port for the silent transitions
+    	pnSpecs[OUTPORT_REDUCED_PETRINET_WITHLT] = new PetriNetPortObjectSpec();
+    	pnSpecs[OUTPORT_REDUCED_PETRINET_WITHLT].setFileName("Reduced Petri net with LT");
+    	
+    	
     	// we need to creat two out port petri net spec
     	pnSpecs[OUTPORT_PETRINET_WITHLT] = new PetriNetPortObjectSpec();
     	pnSpecs[OUTPORT_PETRINET_WITHLT].setFileName("Petri net with LT");
@@ -273,7 +301,7 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
     	pnSpecs[OUTPORT_PETRINET_WITHOUTLT] = new PetriNetPortObjectSpec();
     	pnSpecs[OUTPORT_PETRINET_WITHOUTLT].setFileName("Petri net without LT");
     	
-        return new PortObjectSpec[]{pnSpecs[OUTPORT_PETRINET_WITHLT], pnSpecs[OUTPORT_PETRINET_WITHOUTLT]};
+        return pnSpecs;
     }
 
     /**

@@ -75,7 +75,7 @@ public class InductiveMinerNodeModel extends NodeModel {
 	// here I think it is a map from which string to which correspingd values 
 	public static List<String> defaultClassifer = new ArrayList<String>();
 	
-	private static final  SettingsModelString m_type =  new SettingsModelString(InductiveMinerNodeModel.CFGKEY_METHOD_TYPE, defaultType[0]);
+	private SettingsModelString m_type =  new SettingsModelString(InductiveMinerNodeModel.CFGKEY_METHOD_TYPE, defaultType[0]);
 
 	private SettingsModelDoubleBounded m_noiseThreshold = new SettingsModelDoubleBounded(InductiveMinerNodeModel.CFGKEY_NOISE_THRESHOLD, 0.0, 0, 1.0);
 	private SettingsModelString m_classifier = new SettingsModelString(InductiveMinerNodeModel.CFGKEY_CLASSIFIER, "");

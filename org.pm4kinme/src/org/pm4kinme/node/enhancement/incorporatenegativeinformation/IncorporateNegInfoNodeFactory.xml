@@ -29,8 +29,9 @@
         <inPort index="0" name="Event Log">Event Log as One Input, it includes the positive and negative information</inPort>
         <inPort index="1" name="Petri Net">An existing Petri net</inPort>
         <!-- possibly more input ports here-->
-        <outPort index="0" name="Petri Net With LT">Petri Net with LT</outPort>
-        <outPort index="1" name="Petri Net Without LT">Petri Net without LT</outPort>
+        <outPort index="0" name="Reduced Petri Net With LT">Reduced Petri Net with LT</outPort>
+        <outPort index="1" name="Petri Net With LT">Petri Net with LT</outPort>
+        <outPort index="2" name="Petri Net Without LT">Petri Net without LT</outPort>
         <!-- possibly more output ports here-->
     </ports>    
     

@@ -32,7 +32,7 @@ public class IncorporateNegInfoNodeDialog extends DefaultNodeSettingsPane {
 	
 	// for inductive miner
 	private SettingsModelString m_type;
-	private SettingsModelDoubleBounded m_noiseThreshold = null;
+	private SettingsModelDoubleBounded m_noiseThreshold ;
 	
     /**
      * New pane for configuring the IncorporateNegInfo node.
@@ -64,10 +64,10 @@ public class IncorporateNegInfoNodeDialog extends DefaultNodeSettingsPane {
     	DialogComponentNumber extWeightComponent = new DialogComponentNumber(m_extWeight, "Ext Weight", 0.1);
     	addDialogComponent(extWeightComponent);
     	
-    	DialogComponentNumber posWeightComponent = new DialogComponentNumber(m_posWeight, "Ext Weight", 0.1);
+    	DialogComponentNumber posWeightComponent = new DialogComponentNumber(m_posWeight, "Pos Weight", 0.1);
     	addDialogComponent(posWeightComponent);
     	
-    	DialogComponentNumber negWeightComponent = new DialogComponentNumber(m_negWeight, "Ext Weight", 0.1);
+    	DialogComponentNumber negWeightComponent = new DialogComponentNumber(m_negWeight, "Neg Weight", 0.1);
     	addDialogComponent(negWeightComponent);
     	closeCurrentGroup();
     	

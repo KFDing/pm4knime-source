@@ -230,6 +230,9 @@ public class RepairModelNodeModel extends NodeModel {
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
         // TODO: generated method stub
+    	m_detectLoops.validateSettings(settings);
+    	m_loopModelMoveCosts.validateSettings(settings);
+    	m_detectSubProcesses.validateSettings(settings);
     }
     
     /**
