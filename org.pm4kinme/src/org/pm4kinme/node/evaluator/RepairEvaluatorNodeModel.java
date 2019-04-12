@@ -125,10 +125,12 @@ public class RepairEvaluatorNodeModel extends NodeModel {
     	// generate a table from it 
     	DataTableSpec cmSpec = createOutSpec();
     	BufferedDataContainer cm_container = exec.createDataContainer(cmSpec);
-    	for(int i=0; i< cmRowNum; i++) {
-    		DataRow row = new DefaultRow(CFG_CM_ROW_NAMES[i], result.get(Configuration.ALLOWED_POS_IDX), result.get(Configuration.NOT_ALLOWED_POS_IDX));
-        	cm_container.addRowToTable(row);	
-    	}
+    	//for(int i=0; i< cmRowNum; i++) {
+    		DataRow posRow = new DefaultRow(CFG_CM_ROW_NAMES[0], result.get(Configuration.ALLOWED_POS_IDX), result.get(Configuration.NOT_ALLOWED_POS_IDX));
+        	cm_container.addRowToTable(posRow);	
+        	DataRow negRow = new DefaultRow(CFG_CM_ROW_NAMES[1], result.get(Configuration.ALLOWED_NEG_IDX), result.get(Configuration.NOT_ALLOWED_NEG_IDX));
+        	cm_container.addRowToTable(negRow);	
+    	//}
         cm_container.close();
     	BufferedDataTable cm_result = cm_container.getTable();
     	
@@ -136,9 +138,9 @@ public class RepairEvaluatorNodeModel extends NodeModel {
     	BufferedDataContainer m_container = exec.createDataContainer(new DataTableSpec(QUALITY_MEASURES_SPECS));
     	
     	int tp = result.get(Configuration.ALLOWED_POS_IDX); // true positives
-        int fp = result.get(Configuration.NOT_ALLOWED_POS_IDX); // false positives
+        int fn = result.get(Configuration.NOT_ALLOWED_POS_IDX); // false positives
         int tn = result.get(Configuration.NOT_ALLOWED_NEG_IDX); // true negatives
-        int fn = result.get(Configuration.ALLOWED_NEG_IDX); // false negatives
+        int fp = result.get(Configuration.ALLOWED_NEG_IDX); // false negatives
     	
        
         DoubleCell recall = null; // TP / (TP + FN)
