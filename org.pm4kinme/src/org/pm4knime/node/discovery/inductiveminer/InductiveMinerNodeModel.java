@@ -5,8 +5,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.deckfour.xes.classification.XEventClassifier;
 import org.deckfour.xes.classification.XEventNameClassifier;
@@ -128,6 +130,9 @@ public class InductiveMinerNodeModel extends NodeModel {
 	        pnPortObject.setNet((Petrinet) result[0]);
 	        pnPortObject.setInitMarking((Marking) result[1]);
 	        pnPortObject.setFinalMarking((Marking) result[2]);
+	        Set<Marking> fmSet = new HashSet<>();
+	        fmSet.add((Marking) result[2]);
+	        pnPortObject.setFinalMarkingSet(fmSet);
         }
         logger.info("End of the Inductive Miner");
 

@@ -45,9 +45,9 @@ public class AlphaMinerNodeModel extends NodeModel {
 		XLog log = ((XLogPortObject) inObjects[0]).getLog();
 
 		AlphaMinerParameters alphaParams = new AlphaMinerParameters(AlphaVersion.CLASSIC);
-		Petrinet net = (Petrinet) AlphaMinerPlugin.apply(
-				PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(AlphaMinerPlugin.class), log,
-				new XEventNameClassifier(), alphaParams)[0];
+		// Petrinet net = (Petrinet) AlphaMinerPlugin.apply(PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(AlphaMinerPlugin.class), log,
+		//		new XEventNameClassifier(), alphaParams)[0];
+		Petrinet net  = null;		
 		PetriNetPortObject po = new PetriNetPortObject();
 		po.setNet(net);
 		logger.info("end: alpha");

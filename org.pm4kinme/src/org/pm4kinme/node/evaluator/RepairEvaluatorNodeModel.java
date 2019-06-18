@@ -111,10 +111,11 @@ public class RepairEvaluatorNodeModel extends NodeModel {
     	
     	Petrinet net = netPortObject.getNet();
     	Marking intialMarking = netPortObject.getInitMarking();
+    	Marking finalMarking = netPortObject.getFinalMarking();
     	XLog log = logPortObject.getLog();
         // first to use the plugin to get the confusion matrix
     	
-    	List<Integer> result = EvaluateResult.naiveCheckPN(log, net, intialMarking);
+    	List<Integer> result = EvaluateResult.naiveCheckPN(log, net, intialMarking, finalMarking);
     	/*
     	int[][] confusion_matrix = new int[cmRowNum][cmColNum];
     	confusion_matrix[0][0] = result.get(Configuration.ALLOWED_POS_IDX);

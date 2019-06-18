@@ -35,9 +35,9 @@
     <extension point="org.knime.core.PortType">
        <portType hidden="false" name="Event Log" objectClass="org.pm4kinme.portobject.xlog.XLogPortObject" objectSerializer="org.pm4kinme.portobject.xlog.XLogPortObject$XLogPortObjectSerializer" specClass="org.pm4kinme.portobject.xlog.XLogPortObjectSpec" specSerializer="org.pm4kinme.portobject.xlog.XLogPortObjectSpec$XLogPortObjectSpecSerializer">
        </portType>
-       <portType hidden="false" name="Petri Net" objectClass="org.pm4kinme.portobject.petrinet.PetriNetPortObject" objectSerializer="org.pm4kinme.portobject.petrinet.PetriNetPortObjectSerializer" specClass="org.pm4kinme.portobject.petrinet.PetriNetPortObjectSpec" specSerializer="org.pm4kinme.portobject.petrinet.PetriNetPortObjectSpec$PetriNetPortObjectSpecSerializer">
-       </portType>
        <portType hidden="false" name="Process Tree" objectClass="org.pm4kinme.portobject.processtree.ProcessTreePortObject" objectSerializer="org.pm4kinme.portobject.processtree.ProcessTreePortObjectSerializer" specClass="org.pm4kinme.portobject.processtree.ProcessTreePortObjectSpec" specSerializer="org.pm4kinme.portobject.processtree.ProcessTreePortObjectSpecSerializer">
+       </portType>
+       <portType hidden="false" name="Petri Net" objectClass="org.pm4kinme.portobject.petrinet.PetriNetPortObject" objectSerializer="org.pm4kinme.portobject.petrinet.PetriNetPortObject$Serializer" specClass="org.pm4kinme.portobject.petrinet.PetriNetPortObjectSpec" specSerializer="org.pm4kinme.portobject.petrinet.PetriNetPortObject$PetriNetPortObjectSpecSerializer">
        </portType>
     </extension>
 </plugin>

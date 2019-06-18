@@ -181,7 +181,7 @@ public class RepairModelNodeModel extends NodeModel {
     	
     	// we need to creat two out port petri net spec
     	pnSpec = new PetriNetPortObjectSpec();
-    	pnSpec.setFileName("Petri net After Repair");
+    	// pnSpec.setFileName("Petri net After Repair");
     	
     	
         return new PortObjectSpec[]{pnSpec};

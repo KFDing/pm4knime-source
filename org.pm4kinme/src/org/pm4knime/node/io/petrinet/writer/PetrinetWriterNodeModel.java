@@ -1,11 +1,14 @@
 package org.pm4knime.node.io.petrinet.writer;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
@@ -30,6 +33,10 @@ import org.knime.core.util.FileUtil;
 import org.pm4kinme.external.connectors.prom.PM4KNIMEGlobalContext;
 import org.pm4kinme.portobject.petrinet.PetriNetPortObject;
 import org.pm4kinme.portobject.petrinet.PetriNetPortObjectSpec;
+import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetImpl;
+import org.processmining.models.semantics.petrinet.Marking;
+import org.processmining.plugins.pnml.base.FullPnmlElementFactory;
+import org.processmining.plugins.pnml.base.Pnml;
 import org.processmining.plugins.pnml.exporting.PnmlExportNetToPNML;
 import org.knime.core.node.ExecutionContext;
 import org.knime.core.node.ExecutionMonitor;
@@ -54,10 +61,11 @@ public class PetrinetWriterNodeModel extends NodeModel {
     private static final NodeLogger logger = NodeLogger
             .getLogger(PetrinetWriterNodeModel.class);
         
-    private final SettingsModelString m_outfile = PetrinetWriterNodeDialog.createFileMode();
+    private SettingsModelString m_outNet = PetrinetWriterNodeDialog.createFileMode();
     
-
-    /**
+    String subfix = "marking.txt";
+	
+	/**
      * Constructor for the node model.
      */
     protected PetrinetWriterNodeModel() {
@@ -73,21 +81,42 @@ public class PetrinetWriterNodeModel extends NodeModel {
     protected PortObject[] execute(final PortObject[] inData,  final ExecutionContext exec) throws Exception {
 
         // TODO do something here
-        logger.info("Begin to write Petri net into pnml file");
+        logger.info("Begin to write Petri net into file");
 
-        CheckUtils.checkDestinationFile(m_outfile.getStringValue(),true);
-        
-        URL url = FileUtil.toURL(m_outfile.getStringValue());
-        Path localPath = FileUtil.resolveToPath(url);
         
         PetriNetPortObject pnObj = (PetriNetPortObject) inData[0];
         
         if(pnObj.getNet() != null) {
+        	CheckUtils.checkDestinationFile(m_outNet.getStringValue(),true);
+            
+            URL url = FileUtil.toURL(m_outNet.getStringValue());
+            Path localPath = FileUtil.resolveToPath(url);
+            
         	File f =  createFile(localPath, url);
-        	PnmlExportNetToPNML exporterPNML = new PnmlExportNetToPNML();
         	
-			exporterPNML.exportPetriNetToPNMLFile(pnObj.getContext(), pnObj.getNet(), f);
+			// we should also write the marking into disk
+        	FileOutputStream out = new FileOutputStream(f);
+        	out.write(pnObj.convert2String().getBytes());
+    		out.close();
         }
+        
+        String markingFileName = m_outNet.getStringValue().split(".pnml")[0] + subfix;
+        CheckUtils.checkDestinationFile(markingFileName,true);
+        
+        URL m_url = FileUtil.toURL(markingFileName);
+        Path m_localPath = FileUtil.resolveToPath(m_url);
+        
+        if(pnObj.getInitMarking() !=null && pnObj.getFinalMarking() !=null) {
+        	
+        	MarkingReaderWriter rw = new MarkingReaderWriter();
+        	List<Marking> mList = new ArrayList<>();
+        	mList.add(pnObj.getInitMarking());
+        	mList.add(pnObj.getFinalMarking());
+        	
+        	rw.writeMarking(mList, m_localPath.toString());
+        	
+        }
+        logger.info("End to write Petri net into pnml file");
         return new PortObject[] {};
     }
 
@@ -112,7 +141,7 @@ public class PetrinetWriterNodeModel extends NodeModel {
     protected PortObjectSpec[] configure(final PortObjectSpec[] inSpecs)
             throws InvalidSettingsException {
         
-        String warning = CheckUtils.checkDestinationFile(m_outfile.getStringValue(), true);
+        String warning = CheckUtils.checkDestinationFile(m_outNet.getStringValue(), true);
         if(warning != null) {
         	setWarningMessage(warning);
         }
@@ -127,7 +156,7 @@ public class PetrinetWriterNodeModel extends NodeModel {
      */
     @Override
     protected void saveSettingsTo(final NodeSettingsWO settings) {
-    	m_outfile.saveSettingsTo(settings);
+    	m_outNet.saveSettingsTo(settings);
        
     }
 
@@ -137,7 +166,7 @@ public class PetrinetWriterNodeModel extends NodeModel {
     @Override
     protected void loadValidatedSettingsFrom(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-           m_outfile.loadSettingsFrom(settings);
+    	m_outNet.loadSettingsFrom(settings);
     }
 
     /**
@@ -146,7 +175,7 @@ public class PetrinetWriterNodeModel extends NodeModel {
     @Override
     protected void validateSettings(final NodeSettingsRO settings)
             throws InvalidSettingsException {
-        m_outfile.validateSettings(settings);
+    	m_outNet.validateSettings(settings);
     }
     
     /**
