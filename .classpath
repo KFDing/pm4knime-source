@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="src" path="org.pm4kinme/src"/>
-	<classpathentry kind="lib" path="org.apache.xmlbeans/lib/xbean.jar"/>
-	<classpathentry kind="lib" path="org.pm4kinme/lib/pm4knime-libs-0.0.1-rc.jar"/>
-	<classpathentry kind="output" path="bin"/>
-</classpath>
