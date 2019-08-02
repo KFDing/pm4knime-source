@@ -23,9 +23,9 @@ import org.knime.core.node.util.CheckUtils;
 import org.knime.core.util.FileUtil;
 import org.pm4knime.node.io.petrinet.writer.PetrinetWriterNodeDialog;
 import org.pm4knime.node.io.petrinet.writer.PetrinetWriterNodeModel;
-import org.pm4knime.portobject.petrinet.PetriNetPortObjectSpec;
-import org.pm4knime.portobject.processtree.ProcessTreePortObject;
-import org.pm4knime.portobject.processtree.ProcessTreePortObjectSpec;
+import org.pm4knime.portobject.PetriNetPortObjectSpec;
+import org.pm4knime.portobject.ProcessTreePortObject;
+import org.pm4knime.portobject.ProcessTreePortObjectSpec;
 
 /**
  * This is the model implementation of ProcessTreeWriter.

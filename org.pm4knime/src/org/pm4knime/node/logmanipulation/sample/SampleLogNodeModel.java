@@ -23,9 +23,8 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.pm4knime.node.discovery.inductiveminer.InductiveMinerNodeModel;
 import org.pm4knime.node.logmanipulation.split.SplitLogNodeModel;
-import org.pm4knime.portobject.xlog.XLogPortObject;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpec;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpecCreator;
+import org.pm4knime.portobject.XLogPortObject;
+import org.pm4knime.portobject.XLogPortObjectSpec;
 import org.processmining.incorporatenegativeinformation.help.EventLogUtilities;
 
 import javassist.tools.reflect.Sample;
@@ -131,9 +130,8 @@ public class SampleLogNodeModel extends NodeModel {
     	// but here we need to validate the value of num and percentage, but how to choose them??
     	// choose either of them, it is totally fine, but how to make them into the code??
     	
-    	XLogPortObjectSpecCreator creator =  new XLogPortObjectSpecCreator();
-		m_outSpecs[0] = creator.createSpec("sampled log");
-		m_outSpecs[1] = creator.createSpec("other log");
+    	m_outSpecs[0] = new XLogPortObjectSpec();
+		m_outSpecs[1] = new XLogPortObjectSpec();
 		return new PortObjectSpec[] { m_outSpecs[0], m_outSpecs[1]};
         
     }

@@ -21,10 +21,10 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.pm4knime.node.discovery.inductiveminer.InductiveMinerNodeModel;
-import org.pm4knime.portobject.petrinet.PetriNetPortObject;
-import org.pm4knime.portobject.petrinet.PetriNetPortObjectSpec;
-import org.pm4knime.portobject.xlog.XLogPortObject;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpec;
+import org.pm4knime.portobject.PetriNetPortObject;
+import org.pm4knime.portobject.PetriNetPortObjectSpec;
+import org.pm4knime.portobject.XLogPortObject;
+import org.pm4knime.portobject.XLogPortObjectSpec;
 import org.pm4knime.util.connectors.prom.PM4KNIMEGlobalContext;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetFactory;
@@ -128,13 +128,13 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
 
 		
 		XLog log = logPortData.getLog();
-		Petrinet net = netPortData.getNet();
+		Petrinet net = netPortData.getANet().getNet();
 
 		classifier = new XEventNameClassifier();
 		// 1. get DfMatrix from model, log in pos and neg
 		// need to find a way to deal with ui context creation
 		PluginContext context = PM4KNIMEGlobalContext.instance().getPluginContext();
-		DfMatrix matrix = DfMatrix.createDfMatrix(context, log, net, netPortData.getInitMarking(), classifier);
+		DfMatrix matrix = DfMatrix.createDfMatrix(context, log, net, netPortData.getANet().getInitialMarking(), classifier);
 		// 2. use the weight to adapt the dfg
 		ControlParameters ctlParas = buildControlParameters();
 		updateMatrix(matrix, ctlParas);
@@ -154,24 +154,34 @@ public class IncorporateNegInfoNodeModel extends NodeModel {
 
 		// 4. wrap them into the petri net object
 		PetriNetPortObject[] netPortObjects = new PetriNetPortObject[getNrOutPorts()];
-		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT] = new PetriNetPortObject(
-				pnSpecs[OUTPORT_REDUCED_PETRINET_WITHLT]);
-		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setContext(context);
-		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setNet(danetWithLT.getNet());
-		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setInitMarking(danetWithLT.getInitialMarking());
-		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setFinalMarkingSet(danetWithLT.getFinalMarkings());
+		// TODO: code changed to the new version of PetriNet Object!!
+		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT] = new PetriNetPortObject();
+//		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT] = new PetriNetPortObject(
+//				pnSpecs[OUTPORT_REDUCED_PETRINET_WITHLT]);
+//		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setContext(context);
+//		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setNet(danetWithLT.getNet());
+//		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setInitMarking(danetWithLT.getInitialMarking());
+//		netPortObjects[OUTPORT_REDUCED_PETRINET_WITHLT].setFinalMarkingSet(danetWithLT.getFinalMarkings());
 
-		netPortObjects[OUTPORT_PETRINET_WITHLT] = new PetriNetPortObject(pnSpecs[OUTPORT_PETRINET_WITHLT]);
-		netPortObjects[OUTPORT_PETRINET_WITHLT].setContext(context);
-		netPortObjects[OUTPORT_PETRINET_WITHLT].setNet(anetWithLT.getNet());
-		netPortObjects[OUTPORT_PETRINET_WITHLT].setInitMarking(anetWithLT.getInitialMarking());
-		netPortObjects[OUTPORT_PETRINET_WITHLT].setFinalMarkingSet(anetWithLT.getFinalMarkings());
-
-		netPortObjects[OUTPORT_PETRINET_WITHOUTLT] = new PetriNetPortObject(pnSpecs[OUTPORT_PETRINET_WITHLT]);
-		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setContext(context);
-		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setNet(mnet.petrinet);
-		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setInitMarking(mnet.initialMarking);
-		netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setFinalMarking(mnet.finalMarking);
+		/*
+		 * netPortObjects[OUTPORT_PETRINET_WITHLT] = new
+		 * PetriNetPortObject(pnSpecs[OUTPORT_PETRINET_WITHLT]);
+		 * netPortObjects[OUTPORT_PETRINET_WITHLT].setContext(context);
+		 * netPortObjects[OUTPORT_PETRINET_WITHLT].setNet(anetWithLT.getNet());
+		 * netPortObjects[OUTPORT_PETRINET_WITHLT].setInitMarking(anetWithLT.
+		 * getInitialMarking());
+		 * netPortObjects[OUTPORT_PETRINET_WITHLT].setFinalMarkingSet(anetWithLT.
+		 * getFinalMarkings());
+		 * 
+		 * netPortObjects[OUTPORT_PETRINET_WITHOUTLT] = new
+		 * PetriNetPortObject(pnSpecs[OUTPORT_PETRINET_WITHLT]);
+		 * netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setContext(context);
+		 * netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setNet(mnet.petrinet);
+		 * netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setInitMarking(mnet.initialMarking
+		 * );
+		 * netPortObjects[OUTPORT_PETRINET_WITHOUTLT].setFinalMarking(mnet.finalMarking)
+		 * ;
+		 */
 
 		return netPortObjects;
 	}

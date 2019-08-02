@@ -21,9 +21,8 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
-import org.pm4knime.portobject.xlog.XLogPortObject;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpec;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpecCreator;
+import org.pm4knime.portobject.XLogPortObject;
+import org.pm4knime.portobject.XLogPortObjectSpec;
 import org.pm4knime.settingsmodel.XLogReaderNodeSettingsModel;
 import org.pm4knime.util.connectors.prom.PM4KNIMEGlobalContext;
 import org.processmining.plugins.log.OpenNaiveLogFilePlugin;
@@ -34,7 +33,7 @@ public class XLogReaderNodeModel extends NodeModel {
 	private static final NodeLogger logger = NodeLogger.getLogger(XLogReaderNodeModel.class);
 	private final XLogReaderNodeSettingsModel params = new XLogReaderNodeSettingsModel();
 
-	private XLogPortObjectSpec outSpec ;
+	// private XLogPortObjectSpec outSpec ;
 	
 	protected XLogReaderNodeModel() {
 		super(new PortType[] {},
@@ -53,9 +52,9 @@ public class XLogReaderNodeModel extends NodeModel {
 		
 		po.setLog(result);
 		logger.info("end: import event log");
-		// how to use the PortObject to change the SpecValues??
-		System.out.println("print the value of outspec"+ outSpec.toString());
-		po.setSpec(outSpec);
+		
+		// System.out.println("print the value of outspec"+ outSpec.toString());
+		// po.setSpec(outSpec);
 		// we create classifier for this function
 		Collection<XEventClassifier> classifiers = result.getClassifiers();
 		if(classifiers.isEmpty()) {
@@ -63,15 +62,15 @@ public class XLogReaderNodeModel extends NodeModel {
 			classifiers = info.getEventClassifiers();
 			
 		}
-		outSpec.setClassifiers(classifiers);
+		
 		return new PortObject[] { po };
 	}
 
 	@Override
 	protected PortObjectSpec[] configure(PortObjectSpec[] inSpecs) {
-		// we need to assign actually here about the outputSepc 
-		XLogPortObjectSpecCreator creator =  new XLogPortObjectSpecCreator();
-		outSpec = creator.createSpec();
+		// TODO: delete the SpecCreator class here and don't use 
+		
+		XLogPortObjectSpec outSpec = new XLogPortObjectSpec();
 		
 		return new PortObjectSpec[] { outSpec};
 	}

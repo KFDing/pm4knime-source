@@ -2,6 +2,7 @@ package org.pm4knime.node.io.petrinet.reader;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -20,8 +21,8 @@ import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.util.CheckUtils;
 import org.pm4knime.node.io.petrinet.writer.MarkingReaderWriter;
-import org.pm4knime.portobject.petrinet.PetriNetPortObject;
-import org.pm4knime.portobject.petrinet.PetriNetPortObjectSpec;
+import org.pm4knime.portobject.PetriNetPortObject;
+import org.pm4knime.portobject.PetriNetPortObjectSpec;
 import org.pm4knime.util.connectors.prom.PM4KNIMEGlobalContext;
 import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetFactory;
@@ -63,10 +64,7 @@ public class PetrinetReaderNodeModel extends NodeModel {
     
 	private final SettingsModelString m_fileName = new SettingsModelString(PetrinetReaderNodeModel.CFG_FILE_NAME, "");
 	private final SettingsModelString m_type = new SettingsModelString(GFG_PETRINET_TYPE, "");
-	String subfix = "marking.txt";
-	String markingFileName = m_fileName.getStringValue().split(".pnml")[0] + subfix;
 	
-	private PetriNetPortObject m_netPort = null;
 	
     public PetrinetReaderNodeModel() {
     
@@ -80,56 +78,23 @@ public class PetrinetReaderNodeModel extends NodeModel {
     @Override
     protected PortObject[] execute(final PortObject[] inData,
             final ExecutionContext exec) throws Exception {
-    	
+    	PetriNetPortObject m_netPort = null;
         if(m_type.getStringValue().equals(defaultValue[0])) {
             logger.info("Read Naive Petri net !");
             
-            m_netPort = new PetriNetPortObject();
-            PluginContext context = PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(ImportAcceptingPetriNetPlugin.class);
-        	m_netPort.setContext(context);
-        	// here we must specify the file name from it and then we can read it..
-        	// else we can't...
-        	AcceptingPetriNet aNet =  AcceptingPetriNetFactory.importFromStream(context, 
-        			new FileInputStream(m_fileName.getStringValue()));
+            // read the file and create fileInputStream
+            
+            PluginContext context =  PM4KNIMEGlobalContext.instance().getPM4KNIMEPluginContext();
+            AcceptingPetriNet anet = AcceptingPetriNetFactory.createAcceptingPetriNet();
+			anet.importFromStream(context, new FileInputStream(m_fileName.getStringValue()));
 			
-        	m_netPort.setNet(aNet.getNet());
-        	m_netPort.setInitMarking(aNet.getInitialMarking());
-        	m_netPort.setFinalMarkingSet(aNet.getFinalMarkings());
-			
+        	m_netPort = new PetriNetPortObject(anet);
         }
 		
 		logger.info("end of reading of Petri net");
         return new PortObject[] {m_netPort};
     }
     
-   
-    
-    private AcceptingPetriNet importAcceptingPetriNet() {
-    	PluginContext context = PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(ImportAcceptingPetriNetPlugin.class);
-    	ImportAcceptingPetriNetPlugin plugin = new ImportAcceptingPetriNetPlugin();
-    	try {
-    		m_netPort.setContext(context);
-			AcceptingPetriNet result =  (AcceptingPetriNet) plugin.importFile(context, m_fileName.getStringValue());
-			
-			return result;
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-    	
-    	return null;
-    }
-    
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected void reset() {
-        // TODO Code executed on reset.
-        // Models build during execute are cleared here.
-        // Also data handled in load/saveInternals will be erased here.
-    }
-
     /**
      * we need to define our own Spec for the Petri net and not DataTableSpec
      * {@inheritDoc}
@@ -161,17 +126,8 @@ public class PetrinetReaderNodeModel extends NodeModel {
     	}else {
     		url2String = url.toString();
     	}
-
-    	// reader node, there is no inSpec for portObject, so we need to create Spec especially for
-    	// Petri net 
-    	// the use of  Spec is what ??
-    	m_netPort = new PetriNetPortObject();
     	
-    	PetriNetPortObjectSpec spec =  m_netPort.getSpec();
-    	// spec.setFileName(url2String);
-    	// for input data
-    	
-        return new PortObjectSpec[]{spec};
+        return new PortObjectSpec[]{null};
     }
 
     /** Convert argument string to a URL.
@@ -273,6 +229,12 @@ public class PetrinetReaderNodeModel extends NodeModel {
         // (e.g. data used by the views).
 
     }
+
+	@Override
+	protected void reset() {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
 

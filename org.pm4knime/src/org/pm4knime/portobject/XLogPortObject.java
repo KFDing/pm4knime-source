@@ -1,4 +1,4 @@
-package org.pm4knime.portobject.xlog;
+package org.pm4knime.portobject;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -36,9 +36,9 @@ public class XLogPortObject extends AbstractPortObject {
 	 */
 	public static final PortType TYPE = PortTypeRegistry.getInstance().getPortType(XLogPortObject.class);
 
-	private  XLogPortObjectSpec spec ;
+	private  XLogPortObjectSpec m_spec ;
 
-	private static final String ZIP_ENTRY_NAME = "XLogObject";
+	private static final String ZIP_ENTRY_NAME = "XLogPortObject";
 
 	private XLog log = null;
 
@@ -56,13 +56,15 @@ public class XLogPortObject extends AbstractPortObject {
 		return "This port represents an event log object (XLog)";
 	}
 
-	public void setSpec(XLogPortObjectSpec m_spec) {
-		spec = m_spec;
+	public void setSpec(XLogPortObjectSpec spec) {
+		m_spec = spec;
 	}
 	
 	@Override
 	public PortObjectSpec getSpec() {
-		return spec;
+		if(m_spec == null)
+			m_spec = new XLogPortObjectSpec();
+		return m_spec;
 	}
 	
 
@@ -84,6 +86,7 @@ public class XLogPortObject extends AbstractPortObject {
 		final ObjectOutputStream objOut = new ObjectOutputStream(out);
 		XSerializer serializer = new XesXmlSerializer();
 		serializer.serialize(this.getLog(), objOut);
+		out.close();
 	}
 
 	@Override
@@ -103,6 +106,7 @@ public class XLogPortObject extends AbstractPortObject {
 			e.printStackTrace();
 		}
 		this.setLog(log.get(0));
+		in.close();
 	}
 
 	public static class XLogPortObjectSerializer

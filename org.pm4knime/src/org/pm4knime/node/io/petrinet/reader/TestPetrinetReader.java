@@ -3,7 +3,7 @@ package org.pm4knime.node.io.petrinet.reader;
 import java.io.File;
 
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
-import org.pm4knime.portobject.petrinet.PetriNetPortObject;
+import org.pm4knime.portobject.PetriNetPortObject;
 import org.pm4knime.util.connectors.prom.PM4KNIMEGlobalContext;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;

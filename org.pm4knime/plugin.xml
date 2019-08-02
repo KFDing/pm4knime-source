@@ -30,11 +30,11 @@
 <node category-path="/processmining/manipulation" factory-class="org.pm4knime.node.logmanipulation.split2.LogSplitterNodeFactory" id="org.pm4knime.node.logmanipulation.split2.LogSplitterNodeFactory"/>
 </extension>
     <extension point="org.knime.core.PortType">
-       <portType hidden="false" name="Event Log" objectClass="org.pm4knime.portobject.xlog.XLogPortObject" objectSerializer="org.pm4knime.portobject.xlog.XLogPortObject$XLogPortObjectSerializer" specClass="org.pm4knime.portobject.xlog.XLogPortObjectSpec" specSerializer="org.pm4knime.portobject.xlog.XLogPortObjectSpec$XLogPortObjectSpecSerializer">
+       <portType hidden="false" name="Event Log" objectClass="org.pm4knime.portobject.XLogPortObject" objectSerializer="org.pm4knime.portobject.XLogPortObject$XLogPortObjectSerializer" specClass="org.pm4knime.portobject.XLogPortObjectSpec" specSerializer="org.pm4knime.portobject.XLogPortObjectSpec$XLogPortObjectSpecSerializer">
        </portType>
-       <portType hidden="false" name="Process Tree" objectClass="org.pm4knime.portobject.processtree.ProcessTreePortObject" objectSerializer="org.pm4knime.portobject.processtree.ProcessTreePortObjectSerializer" specClass="org.pm4knime.portobject.processtree.ProcessTreePortObjectSpec" specSerializer="org.pm4knime.portobject.processtree.ProcessTreePortObjectSpecSerializer">
+       <portType hidden="false" name="Process Tree" objectClass="org.pm4knime.portobject.ProcessTreePortObject" objectSerializer="org.pm4knime.portobject.ProcessTreePortObjectSerializer" specClass="org.pm4knime.portobject.ProcessTreePortObjectSpec" specSerializer="org.pm4knime.portobject.ProcessTreePortObjectSpecSerializer">
        </portType>
-       <portType hidden="false" name="Petri Net" objectClass="org.pm4knime.portobject.petrinet.PetriNetPortObject" objectSerializer="org.pm4knime.portobject.petrinet.PetriNetPortObject$Serializer" specClass="org.pm4knime.portobject.petrinet.PetriNetPortObjectSpec" specSerializer="org.pm4knime.portobject.petrinet.PetriNetPortObject$PetriNetPortObjectSpecSerializer">
+       <portType hidden="false" name="Petri Net" objectClass="org.pm4knime.portobject.PetriNetPortObject" objectSerializer="org.pm4knime.portobject.PetriNetPortObject$PetriNetPortObjectSerializer" specClass="org.pm4knime.portobject.PetriNetPortObjectSpec" specSerializer="org.pm4knime.portobject.PetriNetPortObjectSpec$PetriNetPortObjectSpecSerializer">
        </portType>
     </extension>
 </plugin>

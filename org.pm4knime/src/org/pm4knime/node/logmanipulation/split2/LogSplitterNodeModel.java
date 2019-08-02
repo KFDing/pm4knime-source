@@ -20,9 +20,8 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.pm4knime.node.logmanipulation.split.SplitLogNodeModel;
-import org.pm4knime.portobject.xlog.XLogPortObject;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpec;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpecCreator;
+import org.pm4knime.portobject.XLogPortObject;
+import org.pm4knime.portobject.XLogPortObjectSpec;
 import org.processmining.incorporatenegativeinformation.help.EventLogUtilities;
 
 /**
@@ -111,9 +110,8 @@ public class LogSplitterNodeModel extends NodeModel {
     	if(!inSpecs[0].getClass().equals(XLogPortObjectSpec.class)) 
     		throw new InvalidSettingsException("Input is not a valid Event Log!");
     	
-    	XLogPortObjectSpecCreator creator =  new XLogPortObjectSpecCreator();
-		m_outSpecs[0] = creator.createSpec("kept log");
-		m_outSpecs[1] = creator.createSpec("disposed log");
+    	m_outSpecs[0] = new XLogPortObjectSpec();
+		m_outSpecs[1] = new XLogPortObjectSpec();
 		return new PortObjectSpec[] { m_outSpecs[0], m_outSpecs[1]};
     }
 

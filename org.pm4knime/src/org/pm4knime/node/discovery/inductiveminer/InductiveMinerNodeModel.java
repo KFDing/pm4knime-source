@@ -20,11 +20,13 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.knime.core.node.port.PortTypeRegistry;
-import org.pm4knime.portobject.petrinet.PetriNetPortObject;
-import org.pm4knime.portobject.petrinet.PetriNetPortObjectSpec;
-import org.pm4knime.portobject.xlog.XLogPortObject;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpec;
+import org.pm4knime.portobject.PetriNetPortObject;
+import org.pm4knime.portobject.PetriNetPortObjectSpec;
+import org.pm4knime.portobject.XLogPortObject;
+import org.pm4knime.portobject.XLogPortObjectSpec;
 import org.pm4knime.util.connectors.prom.PM4KNIMEGlobalContext;
+import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
+import org.processmining.acceptingpetrinet.models.impl.AcceptingPetriNetImpl;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.semantics.petrinet.Marking;
@@ -57,7 +59,7 @@ public class InductiveMinerNodeModel extends NodeModel {
             .getLogger(InductiveMinerNodeModel.class);
   
     public static final int IN_PORT = 0;
-	public static final String[] defaultType = new String[] {
+	public static final String[] defaultType = {
 			"Inductive Miner", //
 			"Inductive Miner - Infrequent", //
 			"Inductive Miner - Incompleteness", //
@@ -125,14 +127,15 @@ public class InductiveMinerNodeModel extends NodeModel {
         Object[] result = IM.minePetriNet(context, log, createParameters());
         // Object[] result = IMPetriNet.minePetriNet(context, log , param);
         // create the output port object
-        if(pnPortObject.getNet() == null) {
-        	pnPortObject.setContext(context);
-	        pnPortObject.setNet((Petrinet) result[0]);
-	        pnPortObject.setInitMarking((Marking) result[1]);
-	        pnPortObject.setFinalMarking((Marking) result[2]);
-	        Set<Marking> fmSet = new HashSet<>();
-	        fmSet.add((Marking) result[2]);
-	        pnPortObject.setFinalMarkingSet(fmSet);
+        if(pnPortObject.getANet() == null) {
+        	// pnPortObject.setContext(context);
+        	AcceptingPetriNet anet = new AcceptingPetriNetImpl((Petrinet) result[0], (Marking) result[1],  (Marking) result[2]);
+//	        pnPortObject.setNet((Petrinet) result[0]);
+//	        pnPortObject.setInitMarking((Marking) result[1]);
+//	        pnPortObject.setFinalMarking((Marking) result[2]);
+//	        Set<Marking> fmSet = new HashSet<>();
+//	        fmSet.add((Marking) result[2]);
+//	        pnPortObject.setFinalMarkingSet(fmSet);
         }
         logger.info("End of the Inductive Miner");
 
@@ -184,7 +187,7 @@ public class InductiveMinerNodeModel extends NodeModel {
     	
     	for(PortObjectSpec spec: inSpecs) {
     		if(spec instanceof XLogPortObjectSpec) {
-    			classifiers = ((XLogPortObjectSpec)spec).getClassifiers();
+    			// classifiers = ((XLogPortObjectSpec)spec).getClassifiers();
     			if(classifiers==null || classifiers.isEmpty()) {
     				classifiers = setDefaultClassifier();
     			}
@@ -237,7 +240,6 @@ public class InductiveMinerNodeModel extends NodeModel {
     	// and see the result
     	if(pnPortObject == null) {
     		pnPortObject =  new PetriNetPortObject();
-    		
     	}
     	pnSpec = pnPortObject.getSpec();
         return new PortObjectSpec[]{pnSpec};

@@ -27,9 +27,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelStringArray;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.pm4knime.portobject.xlog.XLogPortObject;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpec;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpecCreator;
+import org.pm4knime.portobject.XLogPortObject;
+import org.pm4knime.portobject.XLogPortObjectSpec;
 import org.pm4knime.util.connectors.prom.PM4KNIMEGlobalContext;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.framework.util.collection.AlphanumComparator;
@@ -163,9 +162,9 @@ public class SplitLogNodeModel extends NodeModel {
     	// but after here, we need to check the data informaton to get it.. then how to do it ?? 
     	// load the data from it?? 
     	
-    	XLogPortObjectSpecCreator creator =  new XLogPortObjectSpecCreator();
-		m_outSpecs[0] = creator.createSpec("kept log");
-		m_outSpecs[1] = creator.createSpec("disposed log");
+    	
+		m_outSpecs[0] = new XLogPortObjectSpec();
+		m_outSpecs[1] = new XLogPortObjectSpec();
 		return new PortObjectSpec[] { m_outSpecs[0], m_outSpecs[1]};
     }
 

@@ -1,4 +1,4 @@
-package org.pm4knime.portobject.processtree;
+package org.pm4knime.portobject;
 
 import java.io.BufferedWriter;
 import java.io.File;

@@ -1,10 +1,9 @@
-package org.pm4knime.portobject.processtree;
+package org.pm4knime.portobject;
 
 import java.io.IOException;
 import java.util.zip.ZipEntry;
 
 import org.knime.core.node.port.PortObjectSpec.PortObjectSpecSerializer;
-
 import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 

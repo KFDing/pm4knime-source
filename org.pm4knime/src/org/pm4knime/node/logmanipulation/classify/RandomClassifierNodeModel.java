@@ -20,10 +20,8 @@ import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
-import org.pm4knime.portobject.xlog.XLogPortObject;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpec;
-import org.pm4knime.portobject.xlog.XLogPortObjectSpecCreator;
-import org.processmining.incorporatenegativeinformation.help.Configuration;
+import org.pm4knime.portobject.XLogPortObject;
+import org.pm4knime.portobject.XLogPortObjectSpec;
 import org.processmining.incorporatenegativeinformation.help.EventLogUtilities;
 import org.processmining.incorporatenegativeinformation.models.TraceVariant;
 
@@ -121,8 +119,7 @@ public class RandomClassifierNodeModel extends NodeModel {
     	if(! (inSpecs[0] instanceof XLogPortObjectSpec))
     		throw new InvalidSettingsException("Input is not a valid Event Log!");
     	
-    	XLogPortObjectSpecCreator creator =  new XLogPortObjectSpecCreator();
-		m_outSpec = creator.createSpec("labeled log");
+		m_outSpec = new XLogPortObjectSpec();
     	
         return new PortObjectSpec[]{m_outSpec};
     }
