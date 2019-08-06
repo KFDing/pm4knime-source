@@ -214,5 +214,7 @@
 	<classpathentry kind="lib" path="lib/xstream-1.4.9.jar"/>
 	<classpathentry kind="lib" path="lib/YAWL-latest.jar"/>
 	<classpathentry kind="lib" path="lib/YAWLEditor-2.3.5.wo.jgraph.jar"/>
+	<classpathentry kind="lib" path="lib/HeuristicsMiner-latest.jar"/>
+	<classpathentry kind="lib" path="lib/InteractiveLocalizedPlaceAnalysis-latest.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.Calendar;
 
@@ -29,8 +31,20 @@ public class ObjectStreams {
             "Duke Juggling Dolls",
             "Java Pin",
             "Java Key Chain" };
+	private int testIdx = 0;
 	
 	public static void main(String[] args) throws IOException, ClassNotFoundException{ // , ClassNotFoundException
+		ObjectStreams os = new ObjectStreams();
+		Class clazz = os.getClass();
+		Field[] fList = clazz.getDeclaredFields();
+		
+		System.out.println(fList.length);
+		for(Field f: fList) {
+			System.out.println(f.getName());
+			System.out.println(f.getType().getTypeName());
+		}
+		
+		/*
 		ObjectOutputStream out = null;
 		try {
 			out = new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(dataFile)));
@@ -77,7 +91,7 @@ public class ObjectStreams {
 	}finally {
 			in.close();
 	}
-		
+		*/
 	}
 	
 }
