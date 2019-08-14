@@ -3,6 +3,7 @@ package org.pm4knime.node.conformance;
 import org.knime.core.node.NodeDialogPane;
 import org.knime.core.node.NodeFactory;
 import org.knime.core.node.NodeView;
+import org.pm4knime.node.discovery.heuritsicsminer.HeuristicsMinerNodeView;
 
 /**
  * This is an example implementation of the node factory of the
@@ -28,7 +29,7 @@ public class ConformanceCheckerNodeFactory
     @Override
     public int getNrNodeViews() {
 		// The number of views the node should have, in this cases there is none.
-        return 0;
+        return 1;
     }
 
     /**
@@ -38,7 +39,7 @@ public class ConformanceCheckerNodeFactory
     public NodeView<ConformanceCheckerNodeModel> createNodeView(final int viewIndex,
             final ConformanceCheckerNodeModel nodeModel) {
 		// We return null as this example node does not provide a view. Also see "getNrNodeViews()".
-		return null;
+		return new ConformanceCheckerNodeView(nodeModel);
     }
 
     /**

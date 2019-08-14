@@ -39,7 +39,7 @@
        </portType>
        <portType hidden="false" name="Petri Net" objectClass="org.pm4knime.portobject.PetriNetPortObject" objectSerializer="org.pm4knime.portobject.PetriNetPortObject$PetriNetPortObjectSerializer" specClass="org.pm4knime.portobject.PetriNetPortObjectSpec" specSerializer="org.pm4knime.portobject.PetriNetPortObjectSpec$PetriNetPortObjectSpecSerializer">
        </portType>
-        <portType hidden="false" name="Alignment" objectClass="org.pm4knime.portobject.AlignmentPortObject" objectSerializer="org.pm4knime.portobject.AlignmentPortObject$AlignmentPortObjectSerializer" specClass="org.pm4knime.portobject.AlignmentPortObjectSpec" specSerializer="org.pm4knime.portobject.AlignmentPortObjectSpec$AlignmentPortObjectSpecSerializer">
+        <portType hidden="false" name="Alignment" objectClass="org.pm4knime.portobject.RepResultPortObject" objectSerializer="org.pm4knime.portobject.RepResultPortObject$RepResultPortObjectSerializer" specClass="org.pm4knime.portobject.RepResultPortObjectSpec" specSerializer="org.pm4knime.portobject.RepResultPortObjectSpec$RepResultPortObjectSpecSerializer">
        </portType>
     </extension>
 </plugin>

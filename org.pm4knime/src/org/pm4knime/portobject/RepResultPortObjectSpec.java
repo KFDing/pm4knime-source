@@ -10,11 +10,11 @@ import org.knime.core.node.port.PortObjectSpecZipInputStream;
 import org.knime.core.node.port.PortObjectSpecZipOutputStream;
 import org.knime.core.node.port.PortObjectSpec.PortObjectSpecSerializer;
 
-public class AlignmentPortObjectSpec implements PortObjectSpec {
+public class RepResultPortObjectSpec implements PortObjectSpec {
 
-	private static final String ZIP_ENTRY_NAME = "AlignmentPortObjectSpec";
+	private static final String ZIP_ENTRY_NAME = "RepResultPortObjectSpec";
 	
-	public AlignmentPortObjectSpec() {}
+	public RepResultPortObjectSpec() {}
 	
 	@Override 
 	public JComponent[] getViews() {
@@ -22,10 +22,10 @@ public class AlignmentPortObjectSpec implements PortObjectSpec {
 		return null;
 	}
 
-	public static final class AlignmentPortObjectSpecSerializer extends PortObjectSpecSerializer<AlignmentPortObjectSpec> {
+	public static final class RepResultPortObjectSpecSerializer extends PortObjectSpecSerializer<RepResultPortObjectSpec> {
 
 		@Override
-		public void savePortObjectSpec(AlignmentPortObjectSpec portObjectSpec, PortObjectSpecZipOutputStream out)
+		public void savePortObjectSpec(RepResultPortObjectSpec portObjectSpec, PortObjectSpecZipOutputStream out)
 				throws IOException {
 			// TODO Auto-generated method stub
 			out.putNextEntry(new ZipEntry(ZIP_ENTRY_NAME));
@@ -33,14 +33,14 @@ public class AlignmentPortObjectSpec implements PortObjectSpec {
 		}
 
 		@Override
-		public AlignmentPortObjectSpec loadPortObjectSpec(PortObjectSpecZipInputStream in) throws IOException {
+		public RepResultPortObjectSpec loadPortObjectSpec(PortObjectSpecZipInputStream in) throws IOException {
 			// TODO there is no need to store the Spec here..
 			ZipEntry nextEntry = in.getNextEntry();
 			if ((nextEntry == null) || !nextEntry.getName().equals(ZIP_ENTRY_NAME)) {
 				throw new IOException("Expected zip entry '" + ZIP_ENTRY_NAME + "' not present");
 			}
 			
-			return new AlignmentPortObjectSpec();
+			return new RepResultPortObjectSpec();
 		}
 		
 	}

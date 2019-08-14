@@ -39,8 +39,8 @@ import org.knime.core.node.port.PortObject;
 import org.knime.core.node.port.PortObjectSpec;
 import org.knime.core.node.port.PortType;
 import org.pm4knime.node.enhancement.incorporatenegativeinformation.IncorporateNegInfoNodeModel;
-import org.pm4knime.portobject.AlignmentPortObject;
-import org.pm4knime.portobject.AlignmentPortObjectSpec;
+import org.pm4knime.portobject.RepResultPortObject;
+import org.pm4knime.portobject.RepResultPortObjectSpec;
 import org.pm4knime.portobject.PetriNetPortObject;
 import org.pm4knime.portobject.PetriNetPortObjectSpec;
 import org.pm4knime.portobject.XLogPortObject;
@@ -85,8 +85,13 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 	protected static final int INPORT_PETRINET = 1;
 
 	private static final int OUTPORT_FITNESS = 0;
-	private static final int OUTPORT_ALIGNMENT = 0;
+	private static final int OUTPORT_ALIGNMENT = 1;
 	
+	private XLogPortObject logPO ;
+	private PetriNetPortObject netPO ;
+	private TransEvClassMapping mapping;
+	
+	RepResultPortObject repResultPO;
 	// model related parameters
 	// choose algorithms to use for replay
 	public static final String CFGKEY_STRATEGY_TYPE = "Strategy type";
@@ -109,7 +114,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
     	// input ports include XLogPortObject, and PetriNetPortObject. Output ports include One table to show the fitness info,
     	// ont output PortObject for the alignment.
         
-    	super(new PortType[] { XLogPortObject.TYPE, PetriNetPortObject.TYPE }, new PortType[] {BufferedDataTable.TYPE, AlignmentPortObject.TYPE });
+    	super(new PortType[] { XLogPortObject.TYPE, PetriNetPortObject.TYPE }, new PortType[] {BufferedDataTable.TYPE, RepResultPortObject.TYPE });
         
         initializeClassifiers();
     }
@@ -139,8 +144,8 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
             final ExecutionContext exec) throws Exception {
 
     	logger.info("Start: PNReplayer Conformance Checking");
-    	XLogPortObject logPO = (XLogPortObject) inData[INPORT_LOG];
-		PetriNetPortObject netPO = (PetriNetPortObject) inData[INPORT_PETRINET];
+    	logPO = (XLogPortObject) inData[INPORT_LOG];
+		netPO = (PetriNetPortObject) inData[INPORT_PETRINET];
 		
 		XLog log = logPO.getLog();
 		// to replay the net, we need marking there
@@ -157,7 +162,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 		
 		
 		// 
-		TransEvClassMapping mapping = constructMapping(log, anet.getNet(), eventClassifier);
+		mapping = constructMapping(log, anet.getNet(), eventClassifier);
 		
 		PNRepResult result = replayEngine.replayLog(pluginContext, anet.getNet(), log, mapping, parameters);
 		System.out.println("Replay result size : " + result.size());
@@ -165,14 +170,14 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 		// a table include the fitness statistics information, one is alignment PO
 		BufferedDataTable bt = createInfoTable(result.getInfo(), exec);
 		
-		AlignmentPortObject alignPO = new AlignmentPortObject();
-		alignPO.setAlignment(result.iterator().next());
+		repResultPO = new RepResultPortObject(result, logPO);
+		// alignPO.setRepResult(result);
 		logger.info("End: PNReplayer Conformance Checking");
-        return new PortObject[]{bt, alignPO};
+        return new PortObject[]{bt, repResultPO};
     }
     
     
-    private BufferedDataTable createInfoTable(Map<String, Object> info, final ExecutionContext exec) {
+	private BufferedDataTable createInfoTable(Map<String, Object> info, final ExecutionContext exec) {
     	
     	DataColumnSpec[] cSpec = new DataColumnSpec[2];
     	cSpec[0] = new DataColumnSpecCreator("Type", StringCell.TYPE).createSpec();
@@ -215,6 +220,38 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 		}
 
 		return mapping;
+	}
+
+	public XLogPortObject getLogPO() {
+		return logPO;
+	}
+
+	public void setLogPO(XLogPortObject logPO) {
+		this.logPO = logPO;
+	}
+
+	public PetriNetPortObject getNetPO() {
+		return netPO;
+	}
+
+	public void setNetPO(PetriNetPortObject netPO) {
+		this.netPO = netPO;
+	}
+	
+	public TransEvClassMapping getMapping() {
+		return mapping;
+	}
+
+	public void setMapping(TransEvClassMapping mapping) {
+		this.mapping = mapping;
+	}
+	
+	public RepResultPortObject getRepResultPO() {
+		return repResultPO;
+	}
+
+	public void setRepResultPO(RepResultPortObject repResultPO) {
+		this.repResultPO = repResultPO;
 	}
 
     private IPNReplayAlgorithm getReplayer() {
@@ -278,7 +315,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 		if (!inSpecs[INPORT_PETRINET].getClass().equals(PetriNetPortObjectSpec.class))
 			throw new InvalidSettingsException("Input is not a valid Petri net!");
 
-		AlignmentPortObjectSpec aSpec = new AlignmentPortObjectSpec();
+		RepResultPortObjectSpec aSpec = new RepResultPortObjectSpec();
         return new PortObjectSpec[]{null ,aSpec};
     }
 

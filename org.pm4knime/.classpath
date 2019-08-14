@@ -216,5 +216,8 @@
 	<classpathentry kind="lib" path="lib/YAWLEditor-2.3.5.wo.jgraph.jar"/>
 	<classpathentry kind="lib" path="lib/HeuristicsMiner-latest.jar"/>
 	<classpathentry kind="lib" path="lib/InteractiveLocalizedPlaceAnalysis-latest.jar"/>
+	<classpathentry kind="lib" path="lib/GuideTreeMiner-latest.jar"/>
+	<classpathentry kind="lib" path="lib/PNetAlignmentAnalysis-latest.jar"/>
+	<classpathentry kind="lib" path="lib/TraceAlignmentWithGuideTree-latest.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

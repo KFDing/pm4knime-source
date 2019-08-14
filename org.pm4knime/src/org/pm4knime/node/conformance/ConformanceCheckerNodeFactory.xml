@@ -32,10 +32,10 @@
         <outPort index="1" name="Alignment Port Object">Show alignment for one trace variance</outPort>
         <!-- possibly more output ports here-->
     </ports>    
-    <!-- 
+    
     <views>
-        <view index="0" name="name of first view">Description of first view...</view>
+        <view index="0" name="Projection View">Show the alignment information as projection</view>
         
     </views>
-     -->
+    
 </knimeNode>
