@@ -74,33 +74,27 @@ public class InductiveMinerNodeModel extends NodeModel {
 	
 	private static boolean withNoiseThreshold = false;
 
-	// we should get it from the event log and check how many classifiers it has!!!
-	// and then use it as one parameter into next field to choose it 
-	// here I think it is a map from which string to which correspingd values 
-	public static List<String> defaultClassifer = new ArrayList<String>();
-	
 	private SettingsModelString m_type =  new SettingsModelString(InductiveMinerNodeModel.CFGKEY_METHOD_TYPE, defaultType[0]);
 
 	private SettingsModelDoubleBounded m_noiseThreshold = new SettingsModelDoubleBounded(InductiveMinerNodeModel.CFGKEY_NOISE_THRESHOLD, 0.0, 0, 1.0);
+	
+	
+	// for classifer, only event name is possible now to choose and show
+	
+	// if we want it simpler solution, just set the event name as the default one...
+	// if we want to update on them, we need to get the event log values from this
+	// simple solution here, at first!! 
+	private static Collection<XEventClassifier> classifiers = setDefaultClassifier();
+	public static List<String> defaultClassifer = setClassifierNames(classifiers);
+	
 	private SettingsModelString m_classifier = new SettingsModelString(InductiveMinerNodeModel.CFGKEY_CLASSIFIER, "");
 	
-	// private MiningParameters param ; // = new MiningParametersIM();
-	private XLog log = null;
-	private XLogPortObject m_logPortObject ;
-	private PetriNetPortObjectSpec pnSpec = null;
-	PetriNetPortObject pnPortObject;
-	Collection<XEventClassifier> classifiers;
-	private Map<String, XEventClassifier> map;
     /**
      * Constructor for the node model.
      */
     protected InductiveMinerNodeModel() {
-    	// here we should also create the context and put it here, but how to accept it 
-    	// actually from the event reader and then give it here. 
-        // super(new PortType[] {XLogPortObject.TYPE}, new PortType[] { PetriNetPortObject.TYPE});
     	super(new PortType[] { XLogPortObject.TYPE },
 				new PortType[] { PetriNetPortObject.TYPE });
-    	// we need to get such information from log, so we need the in data spec
     }
     
 
@@ -108,38 +102,30 @@ public class InductiveMinerNodeModel extends NodeModel {
      * {@inheritDoc}
      */
     @Override
-    protected PortObject[] execute(final PortObject[] inData,
+    protected PortObject[] execute(final PortObject[] inObjects,
             final ExecutionContext exec) throws Exception {
 
-        logger.info("Begin Inductive Miner");
+        logger.info("Begin: Inductive Miner");
+        
+        XLogPortObject logPO = null;
         // get the log from inData
-        for(PortObject obj: inData)
+        for(PortObject obj: inObjects)
         	if(obj instanceof XLogPortObject) {
-        		m_logPortObject = (XLogPortObject)obj;
+        		logPO = (XLogPortObject)obj;
         		break;
         	}
         
-        log = m_logPortObject.getLog();
+        XLog log = logPO.getLog();
         
-        // second to give the mining context
         PluginContext context =  PM4KNIMEGlobalContext.instance().getPluginContext(); //.getFutureResultAwarePluginContext(IM.class);
         
         Object[] result = IM.minePetriNet(context, log, createParameters());
-        // Object[] result = IMPetriNet.minePetriNet(context, log , param);
-        // create the output port object
-        if(pnPortObject.getANet() == null) {
-        	// pnPortObject.setContext(context);
-        	AcceptingPetriNet anet = new AcceptingPetriNetImpl((Petrinet) result[0], (Marking) result[1],  (Marking) result[2]);
-//	        pnPortObject.setNet((Petrinet) result[0]);
-//	        pnPortObject.setInitMarking((Marking) result[1]);
-//	        pnPortObject.setFinalMarking((Marking) result[2]);
-//	        Set<Marking> fmSet = new HashSet<>();
-//	        fmSet.add((Marking) result[2]);
-//	        pnPortObject.setFinalMarkingSet(fmSet);
-        }
-        logger.info("End of the Inductive Miner");
-
-        return new PortObject[] { pnPortObject };
+        AcceptingPetriNet anet = new AcceptingPetriNetImpl((Petrinet) result[0], (Marking) result[1],  (Marking) result[2]);
+        
+        PetriNetPortObject pnPO = new PetriNetPortObject(anet);
+        
+        logger.info("End: Inductive Miner");
+        return new PortObject[] { pnPO};
     }
 
     private  MiningParameters createParameters() throws InvalidSettingsException {
@@ -159,11 +145,11 @@ public class InductiveMinerNodeModel extends NodeModel {
         	throw new InvalidSettingsException("unknown inductive miner type "+ m_type.getStringValue());
         param.setNoiseThreshold((float) m_noiseThreshold.getDoubleValue());
         // we need to give one of the classifier to have it
-        /*
-        if(m_classifier.isEnabled()) {
-        	param.setClassifier(map.get(m_classifier.getStringValue()));
-        }
-    	*/
+        // we need to get the classifer it uses
+        
+        XEventClassifier classifier = mapClassifier(m_classifier.getStringValue());
+        param.setClassifier(classifier);
+    	
         return param;
     } 
     
@@ -173,44 +159,32 @@ public class InductiveMinerNodeModel extends NodeModel {
     @Override
     protected void reset() {
         // TODO Code executed on reset.
-        // Models build during execute are cleared here.
-        // Also data handled in load/saveInternals will be erased here.
     }
-    private Collection<XEventClassifier> setDefaultClassifier(){
+    
+    private XEventClassifier mapClassifier(String name) {
+    	for(XEventClassifier clf: classifiers) {
+			if(clf.name().equals(name))
+				return clf;
+		}
+    	return null;
+    }
+    
+    // here we collect all the classifiers, the classifier should be changed due to the different event log
+    // it should be object based, shouldn't be static to class!!! 
+    private static Collection<XEventClassifier> setDefaultClassifier(){
     	Collection<XEventClassifier> classifiers = new ArrayList<XEventClassifier>();
 		classifiers.add(new XEventNameClassifier());
 		return classifiers;
     }
     
-    private Collection<XEventClassifier> assignClassifier(PortObjectSpec[] inSpecs){
-    	Collection<XEventClassifier> classifiers =null;
+    public static List<String> setClassifierNames(Collection<XEventClassifier> classList){
+    	List<String> nameList = new ArrayList();
     	
-    	for(PortObjectSpec spec: inSpecs) {
-    		if(spec instanceof XLogPortObjectSpec) {
-    			// classifiers = ((XLogPortObjectSpec)spec).getClassifiers();
-    			if(classifiers==null || classifiers.isEmpty()) {
-    				classifiers = setDefaultClassifier();
-    			}
-    				
-    			createClassifierMap(classifiers, defaultClassifer);
-    			// m_classifier =  new SettingsModelString(InductiveMinerNodeModel.CFGKEY_CLASSIFIER, defaultClassifer.get(0));
-    			break;
-    		}
-    	}
-    	return classifiers;
-    }
-    
-    // we need to get the classifiers from event log, or inspec specification..go to configuration
-    private void createClassifierMap(Collection<XEventClassifier> classifiers, List<String> defaultClassifier){
-    	// but we don't consider the real connection of model and log
-    	map =  new HashMap<String, XEventClassifier>();
-    	
-    	int i=0;
-		for(XEventClassifier clf: classifiers) {
-			defaultClassifier.add(i, clf.name());
-    		map.put(clf.name(), clf);
-    		i++;
-    	}
+		for(XEventClassifier clf: classList) {
+			nameList.add(clf.name());
+		}
+	
+		return nameList;
     }
 
     /**
@@ -223,25 +197,7 @@ public class InductiveMinerNodeModel extends NodeModel {
     	if(!inSpecs[0].getClass().equals(XLogPortObjectSpec.class)) 
     		throw new InvalidSettingsException("Input is not a valid Event Log!");
     	
-    	if(classifiers == null || classifiers.isEmpty())
-    		classifiers = assignClassifier(inSpecs);
-    	if(classifiers == null) {
-    		throw new InvalidSettingsException("No corresponding classifier available");
-    	}
-    	boolean hasXLog = false;
-    	if(!classifiers.isEmpty())
-    		hasXLog = true;
-    	
-    	if(! hasXLog) {
-    		throw new InvalidSettingsException("The inport is not an xlog file");
-    	}
-    	
-    	// here sth goes wrong, because I don't use the right InSpec to define my outSpec, change it
-    	// and see the result
-    	if(pnPortObject == null) {
-    		pnPortObject =  new PetriNetPortObject();
-    	}
-    	pnSpec = pnPortObject.getSpec();
+    	PetriNetPortObjectSpec pnSpec = new PetriNetPortObjectSpec();
         return new PortObjectSpec[]{pnSpec};
     }
 
@@ -255,9 +211,7 @@ public class InductiveMinerNodeModel extends NodeModel {
     	   m_noiseThreshold.saveSettingsTo(settings);
     }
 
-    public static List<String> getClassifier(){
-    		return defaultClassifer;
-    }
+   
     /**
      * {@inheritDoc}
      */

@@ -116,7 +116,7 @@ public class SplitLogNodeDialog extends DataAwareNodeDialogPane {
 			// we can get the log object and then set all the choice of them, but at first, we need to put all the stuff here again
 			XLogPortObject logPortObject = (XLogPortObject) input[0];
 			log = logPortObject.getLog();
-			System.out.println(log.getAttributes().size());
+			// System.out.println(log.getAttributes().size());
 			
 			//  here we need to adapt the setting from here
 			filter = new AttributeLogFilter(log);

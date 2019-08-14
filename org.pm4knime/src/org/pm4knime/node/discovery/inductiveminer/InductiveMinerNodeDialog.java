@@ -55,17 +55,13 @@ public class InductiveMinerNodeDialog extends DefaultNodeSettingsPane {
 		*/
         // for noise filter, which is triggered by the choice of m_type 
         // this is for choose information w.r.t. the InData
-        List<String> defaultClassifier =  InductiveMinerNodeModel.getClassifier();
+        List<String> classifierNames =  InductiveMinerNodeModel.defaultClassifer;
         DialogComponentStringSelection m_classifierComp ;
         m_classifier =  new SettingsModelString(InductiveMinerNodeModel.CFGKEY_CLASSIFIER, "select a classifier");
-        if(defaultClassifier==null || defaultClassifier.isEmpty() ) {
-        	m_classifier.setEnabled(false);
-        	
-        }else {
-	        m_classifier.setEnabled(true);
-	        m_classifierComp = new DialogComponentStringSelection(m_classifier, "Select One Classifier", defaultClassifier);
-	        addDialogComponent(m_classifierComp);
-        }
+        
+        m_classifierComp = new DialogComponentStringSelection(m_classifier, "Select One Classifier", classifierNames);
+        addDialogComponent(m_classifierComp);
+        
     }
 }
 

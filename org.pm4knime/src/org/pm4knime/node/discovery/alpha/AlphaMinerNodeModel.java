@@ -71,7 +71,7 @@ public class AlphaMinerNodeModel extends NodeModel {
 		AcceptingPetriNet anet = new AcceptingPetriNetImpl((Petrinet) result[0], (Marking) result[1]);
 		
 		PetriNetPortObject po = new PetriNetPortObject(anet);
-		logger.info("end: alpha");
+		logger.info("end: alpha miner");
 		return new PortObject[] { po };
 	}
 
