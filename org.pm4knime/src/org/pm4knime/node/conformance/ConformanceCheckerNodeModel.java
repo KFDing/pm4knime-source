@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.deckfour.xes.classification.XEventNameClassifier;
 import org.deckfour.xes.info.XLogInfo;
 import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XLog;
+import org.knime.base.node.io.tablecreator.TableCreator2NodeSettings;
 import org.knime.core.data.DataCell;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -92,6 +94,8 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 	private TransEvClassMapping mapping;
 	
 	RepResultPortObject repResultPO;
+	XEventClass evClassDummy = new XEventClass("dummy", 1);
+	
 	// model related parameters
 	// choose algorithms to use for replay
 	public static final String CFGKEY_STRATEGY_TYPE = "Strategy type";
@@ -105,6 +109,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 	public List<String> classifierNames ;
 	SettingsModelString m_classifierName = new SettingsModelString(XEventClassifierInterface.CKF_KEY_EVENT_CLASSIFIER, "");
 	
+	TableCreator2NodeSettings m_costSettings ;
     /**
      * Constructor for the node model.
      */
@@ -117,6 +122,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
     	super(new PortType[] { XLogPortObject.TYPE, PetriNetPortObject.TYPE }, new PortType[] {BufferedDataTable.TYPE, RepResultPortObject.TYPE });
         
         initializeClassifiers();
+        m_costSettings = new TableCreator2NodeSettings();
     }
 
     
@@ -202,7 +208,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
     	return bt;
     }
 
-	private TransEvClassMapping constructMapping(XLog log, Petrinet net,  XEventClassifier eventClassifier) {
+	public static TransEvClassMapping constructMapping(XLog log, Petrinet net,  XEventClassifier eventClassifier) {
 		TransEvClassMapping mapping = new TransEvClassMapping(eventClassifier, new XEventClass("DUMMY", 99999));
 
 		XLogInfo summary = XLogInfoFactory.createLogInfo(log, eventClassifier);
@@ -271,14 +277,15 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
     	// how to create a table to assign such values here?? 
 		// if many event classes are available here?? 
     	
-		XEventClass evClassDummy = new XEventClass("", 1);
-		
 		XLogInfo logInfo = XLogInfoFactory.createLogInfo(log, eventClassifier);
 		Collection<XEventClass> eventClasses =  logInfo.getEventClasses().getClasses();
 		
-		IPNReplayParameter parameters = new CostBasedCompleteParam(eventClasses,
-				evClassDummy, anet.getNet().getTransitions(), 2, 5);
-		
+		// here we need to add cost values here, if we have default values htere
+//		IPNReplayParameter parameters = new CostBasedCompleteParam(eventClasses,
+//				evClassDummy, anet.getNet().getTransitions(), 2, 5);
+//		
+		// set all cost here 
+		IPNReplayParameter parameters = createCostParameter(eventClasses, anet.getNet().getTransitions());
 		parameters.setInitialMarking(anet.getInitialMarking());
 		// here cast needed to transfer from Set<Marking> to Marking[]
 		Marking[] fmList = new Marking[anet.getFinalMarkings().size()];
@@ -293,8 +300,86 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 		
     	return parameters;
     } 
+	
+	private IPNReplayParameter createCostParameter(Collection<XEventClass> eventClasses, Collection<Transition> tCol) {
+		
+		Map<XEventClass, Integer> mapEvClass2Cost = new HashMap();;
+		// put dummy transition into the map
+		
+		Map<Transition, Integer> mapTrans2Cost = new HashMap();
+		Map<Transition, Integer> mapSync2Cost = new HashMap();
+		
+		int[] rowIndices = m_costSettings.getRowIndices();
+		int[] colIndices = m_costSettings.getColumnIndices();
+		String[] valueList = m_costSettings.getValues();
+		
+		// recover the setting, change the names from string to EventClass or Transition
+		for(int i=0; i< rowIndices.length ; i += 2) {
+			// currently, rowIdx=rowIdx = 0, colIdx=0, colIdx = 1, values = A,1; 
+			switch(colIndices[i]) {
+			case 0: // the first log move name 
+				
+				String eventName = valueList[i];
+				// find the corresponding event class
+				XEventClass eClass = findEventClass(eventName, eventClasses);
+				
+				int lmCost = Integer.valueOf(valueList[i+1]);
+				mapEvClass2Cost.put(eClass, lmCost);
+				
+				break;
+			case 2: // model  move name and cost 
+				String transitionName = valueList[i];
+				// find the corresponding event class
+				Transition t = findTransition(transitionName, tCol);
+				
+				int mmCost = Integer.valueOf(valueList[i+1]);
+				mapTrans2Cost.put(t, mmCost);
+				break;
+			case 4:
+				String stName = valueList[i];
+				// find the corresponding event class
+				Transition st = findTransition(stName.split(" :")[0], tCol);
+				
+				int smCost = Integer.valueOf(valueList[i+1]);
+				mapSync2Cost.put(st, smCost);
+				break;
+			default:
+				System.out.println("Other situation exists");
+			}
+			
+		}
+		
+		return new CostBasedCompleteParam(mapEvClass2Cost, mapTrans2Cost, mapSync2Cost);
+		
+	}
     
-    /**
+    private Transition findTransition(String transitionName, Collection<Transition> tCol) {
+		// TODO given transition name, we can find the transition in net
+    	
+    	for(Transition t: tCol) {
+    		if(transitionName.equals(t.getLabel()))
+    			return t;
+    		
+    	}
+    	
+		return null;
+	}
+
+	private XEventClass findEventClass(String eventName, Collection<XEventClass> eventClasses) {
+		// TODO Auto-generated method stub
+		for(XEventClass eClass : eventClasses) {
+			if(eventName.equals(eClass.getId()))
+				return eClass;
+		}
+		if(eventName.equals(evClassDummy.getId()))
+			return evClassDummy;
+		
+		return null;
+	}
+
+
+
+	/**
      * {@inheritDoc}
      */
     @Override
@@ -327,6 +412,8 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
          // TODO: generated method stub
     	m_strategy.saveSettingsTo(settings);
     	m_classifierName.saveSettingsTo(settings);
+    	
+    	m_costSettings.saveSettings(settings);
     }
 
     /**
@@ -338,6 +425,8 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
         // TODO: generated method stub
     	m_strategy.loadSettingsFrom(settings);
     	m_classifierName.loadSettingsFrom(settings);
+    	
+    	m_costSettings.loadSettings(settings);
     }
 
     /**

@@ -1,5 +1,6 @@
 package org.pm4knime.node.conformance;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,6 +19,7 @@ import org.deckfour.xes.info.XLogInfo;
 import org.deckfour.xes.info.XLogInfoFactory;
 import org.deckfour.xes.model.XLog;
 import org.knime.base.node.io.filereader.ColProperty;
+import org.knime.base.node.io.tablecreator.TableCreator2NodeSettings;
 import org.knime.base.node.io.tablecreator.table.Spreadsheet;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
@@ -40,7 +42,9 @@ import org.knime.core.node.port.PortObject;
 import org.pm4knime.portobject.PetriNetPortObject;
 import org.pm4knime.portobject.XLogPortObject;
 import org.pm4knime.util.XEventClassifierInterface;
+import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
+import org.processmining.plugins.connectionfactories.logpetrinet.TransEvClassMapping;
 
 
 /**
@@ -51,6 +55,9 @@ import org.processmining.models.graphbased.directed.petrinet.elements.Transition
  */
 public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
 	private static final int CFG_COST_TYPE_NUM = 6;
+	private static final int CFG_DEFAULT_LM_COST = 1;
+	private static final int CFG_DEFAULT_MM_COST = 1;
+	private static final int CFG_DEFAULT_SM_COST = 0;
 	public static String[] CFG_MCOST_KEY = {"model move cost", "log move cost", "sync move cost"};
 	public static String[] CFG_MOVE_KEY = {"model move", "log move", "sync move"};
 	
@@ -67,7 +74,9 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
 	
 	// create Jcomponent 
 	JPanel optionPanel ; 
-	Spreadsheet m_spreadsheet ; 
+	Spreadsheet m_spreadsheet ;
+	// to store the values from spreadsheet
+	private TableCreator2NodeSettings m_settings;
 	
 	Map<XEventClass, Integer> mapEvClass2Cost = null;
 	Map<Transition, Integer> mapTrans2Cost = null;
@@ -91,6 +100,9 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
     	addTab("Options", optionPanel, true);
     	
     	m_spreadsheet = new Spreadsheet();
+    	m_settings = new TableCreator2NodeSettings();
+		// check the change of m_spreadsheet, reduce the row and column numbers to show
+		m_spreadsheet.scrollRectToVisible(new Rectangle(50,50, 100,100));
     	optionPanel.add(m_spreadsheet);
     	
     	// add other component in JPanel here
@@ -108,6 +120,21 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
 		// TODO for the ones that could be saved, then we save it there, others values, not saving..
 		m_strategy.saveSettingsTo(settings);
 		m_classifierName.saveSettingsTo(settings);
+		
+		m_spreadsheet.stopCellEditing();
+        if (m_spreadsheet.hasParseErrors()) {
+            throw new InvalidSettingsException("Some cells cannot be parsed.");
+        }
+        m_settings.setRowIndices(m_spreadsheet.getRowIndices());
+        m_settings.setColumnIndices(m_spreadsheet.getColumnIndices());
+        m_settings.setValues(m_spreadsheet.getValues());
+        m_settings.setColumnProperties(m_spreadsheet.getColumnProperties());
+        m_settings.setRowIdPrefix(m_spreadsheet.getRowIdPrefix());
+        m_settings.setRowIdSuffix(m_spreadsheet.getRowIdSuffix());
+        m_settings.setRowIdStartValue(m_spreadsheet.getRowIdStartValue());
+        m_settings.setHightlightOutputTable(
+                m_spreadsheet.getHightLightOutputTable());
+        m_settings.saveSettings(settings);
 	}
 	
 	
@@ -117,63 +144,176 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
 	protected void loadSettingsFrom(final NodeSettingsRO settings,
 			final PortObject[] input) throws NotConfigurableException {
 		// inputs are XLog and Petri net
-		if (!(input[ConformanceCheckerNodeModel.INPORT_LOG] instanceof XLogPortObject))
-			throw new NotConfigurableException("Input is not a valid event log!");
-
-		if (!(input[ConformanceCheckerNodeModel.INPORT_PETRINET] instanceof PetriNetPortObject))
-			throw new NotConfigurableException("Input is not a valid Petri net!");
-		
-		logPO = (XLogPortObject) input[ConformanceCheckerNodeModel.INPORT_LOG];
-		netPO = (PetriNetPortObject) input[ConformanceCheckerNodeModel.INPORT_PETRINET];
-		
-		// but could we store the event classifier somewhere?? So we don't need to?? Not really!!
-		// we can set the default values
-		XLog log = logPO.getLog();
-		// here we can have different types of classifier for an event log
-		// classifierList = log.getClassifiers();
-		// System.out.println("Classifier size is " + classifierList.size());
-		// as one option here to choose, after it is chosen, we can show the cost information
-		// we can have a default one, but if we have chosen, then update!!
 		
 		
-		XEventClassifier eventClassifier = new XEventNameClassifier();
-		XLogInfo summary = XLogInfoFactory.createLogInfo(log, eventClassifier);
-		Collection<XEventClass> eventClasses =  summary.getEventClasses().getClasses();
-		System.out.println("Event Class  size is " + eventClasses.size());
-		
-		Collection<Transition> transitions = netPO.getANet().getNet().getTransitions();
-		System.out.println("Transition size is " + transitions.size());
-		// get the list of event names here, but if we don't have the same event name classifier, what to do??
-		// then we need to make sure the classifier should be in the PetriNetPortObjectSpec.. Or 
-		// or another option is, we have transitions here, so we just choose the event log classifier to map!!!
-		System.out.println("Here we need to create three tables for the costs");
-		// two tables, or we can even have three tables, to define different costs for each moves
-		// to save space, we use 
-		
-	}
-	// we create 1 table for three types of cost to show them at first
-	private void setCostTable() {
-		
-		SortedMap<Integer, ColProperty> m_colProps = new TreeMap<Integer, ColProperty>();
-		
-		// we could create a table and get its data and put it there..
-		
-		DataColumnSpec[] specs = new DataColumnSpec[CFG_COST_TYPE_NUM];
-		int i=0;
-		while(i < CFG_COST_TYPE_NUM) {
-			specs[i++] = new DataColumnSpecCreator(CFG_MOVE_KEY[i/2], StringCell.TYPE).createSpec();
-			specs[i++] = new DataColumnSpecCreator(CFG_MCOST_KEY[i/2], IntCell.TYPE).createSpec();
+		try {
+			m_strategy.loadSettingsFrom(settings);
+			m_classifierName.loadSettingsFrom(settings);
 			
+			m_settings.loadSettings(settings);
+		} catch (InvalidSettingsException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-		
-		// here we create a table from setting in NodeModel, but just save it here.. But anyway, could we get it by all??
-		
-		
-		DataTableSpec tableSpec = new DataTableSpec(specs);
-		ColumnRearranger c = new ColumnRearranger(tableSpec);
+		// there are old settings which we can use it here to load the old settings there.
+		if(m_settings.getValues().length > 0 ) {
+			m_spreadsheet.setData(
+	                m_settings.getColumnProperties(),
+	                m_settings.getRowIndices(),
+	                m_settings.getColumnIndices(),
+	                m_settings.getValues());
+	        m_spreadsheet.setRowIdPrefix(m_settings.getRowIdPrefix());
+	        m_spreadsheet.setRowIdSuffix(m_settings.getRowIdSuffix());
+	        m_spreadsheet.setRowIdStartValue(m_settings.getRowIdStartValue());
+	        m_spreadsheet.setHighlightOutputTable(
+	                m_settings.getHightlightOutputTable());
+	        // I (Heiko) would rather like to give the table the focus, but this
+	        // does not seem to work, instead clear focused cell
+	        m_spreadsheet.clearFocusedCell();
+			
+		}else {
+			// we create the new setting from the input data
+			if (!(input[ConformanceCheckerNodeModel.INPORT_LOG] instanceof XLogPortObject))
+				throw new NotConfigurableException("Input is not a valid event log!");
+
+			if (!(input[ConformanceCheckerNodeModel.INPORT_PETRINET] instanceof PetriNetPortObject))
+				throw new NotConfigurableException("Input is not a valid Petri net!");
+			
+			logPO = (XLogPortObject) input[ConformanceCheckerNodeModel.INPORT_LOG];
+			netPO = (PetriNetPortObject) input[ConformanceCheckerNodeModel.INPORT_PETRINET];
+			
+			// but could we store the event classifier somewhere?? So we don't need to?? Not really!!
+			// we can set the default values
+			XLog log = logPO.getLog();
+			AcceptingPetriNet anet = netPO.getANet();
+			
+			// TODO: different classifier available
+			XEventClassifier eventClassifier = new XEventNameClassifier();
+			XLogInfo summary = XLogInfoFactory.createLogInfo(log, eventClassifier);
+			
+			TransEvClassMapping mapping = ConformanceCheckerNodeModel.constructMapping(log, anet.getNet(), eventClassifier);
+			
+			Collection<XEventClass> eventClasses =  summary.getEventClasses().getClasses();
+			// add one dummy event class here, to make sure they are the one, we can add other value 
+			
+			Collection<Transition> transitions = anet.getNet().getTransitions();
+			
+			setCostTable(eventClasses, transitions, mapping);
+		}
 		
 	}
 	
+	// we create 1 table for three types of cost to show them at first, but based on the spreadsheet 
+	// without classifier at first
+	private void setCostTable(Collection<XEventClass> eventClasses, Collection<Transition> transitions, TransEvClassMapping mapping ) {
+		
+		SortedMap<Integer, ColProperty> m_colProps = new TreeMap<Integer, ColProperty>();
+		
+		DataColumnSpec[] specs = new DataColumnSpec[CFG_COST_TYPE_NUM];
+		
+		SortedMap<Integer, ColProperty> props = new TreeMap();
+		
+		int i=0;
+		while(i < CFG_COST_TYPE_NUM) {
+			specs[i] = new DataColumnSpecCreator(CFG_MOVE_KEY[i/2], StringCell.TYPE).createSpec();
+			ColProperty moveNamePro = new ColProperty();
+			moveNamePro.setColumnSpec(specs[i]);
+			moveNamePro.setUserSettings(false);
+			moveNamePro.setMissingValuePattern("");
+			props.put(i, moveNamePro);
+			
+			i++;
+			
+			specs[i] = new DataColumnSpecCreator(CFG_MCOST_KEY[i/2], IntCell.TYPE).createSpec();
+			ColProperty moveCostPro = new ColProperty();
+			moveCostPro.setColumnSpec(specs[i]);
+			moveCostPro.setUserSettings(false);
+			// set default cost as 1
+			moveCostPro.setMissingValuePattern(CFG_DEFAULT_LM_COST+"");
+			props.put(i, moveCostPro);
+			
+			i++;
+		}
+		
+		// first to use the List to store the variable data 
+		List<Integer> rowIdxList = new ArrayList();
+		List<Integer> colIdxList = new ArrayList();
+		// List<Integer> moveCostList = new ArrayList();
+		// List<String> moveNameList = new ArrayList();
+		List<String> moveList = new ArrayList();
+		
+		// for event classes the name and cost, we list here
+		int colIdx = 0;
+		int rowIdx = 0;
+		for(XEventClass eClass :  eventClasses) {
+			// column 0 and 1 we need to use it
+			rowIdxList.add(rowIdx);
+			colIdxList.add(colIdx);
+			moveList.add(eClass.getId());
+			
+			rowIdxList.add(rowIdx);
+			colIdxList.add(colIdx + 1);
+			moveList.add(CFG_DEFAULT_LM_COST+"");
+			
+			rowIdx++;
+		}
+		
+		// add values for dummy event class 
+		XEventClass evClassDummy = new XEventClass("dummy", 1);
+		rowIdxList.add(rowIdx);
+		colIdxList.add(colIdx);
+		moveList.add(evClassDummy.getId());
+		
+		rowIdxList.add(rowIdx);
+		colIdxList.add(colIdx + 1);
+		moveList.add(CFG_DEFAULT_LM_COST+"");
+		
+		colIdx += 2;
+		// for transition the name and cost, we list here
+		rowIdx = 0;
+		for(Transition t:  transitions) {
+			// column 0 and 1 we need to use it
+			rowIdxList.add(rowIdx);
+			colIdxList.add(colIdx);
+			moveList.add(t.getLabel());
+			
+			rowIdxList.add(rowIdx);
+			colIdxList.add(colIdx + 1);
+			moveList.add(CFG_DEFAULT_MM_COST+"");
+			rowIdx ++;
+		}
+		colIdx += 2;
+		// for transition the name and cost, we list here
+		rowIdx = 0;
+		for(Transition t : mapping.keySet()) {
+			// column 0 and 1 we need to use it
+			rowIdxList.add(rowIdx);
+			colIdxList.add(colIdx);
+			moveList.add(t.getLabel() +" : "  +mapping.get(t).getId());
+			
+			rowIdxList.add(rowIdx);
+			colIdxList.add(colIdx + 1);
+			moveList.add(CFG_DEFAULT_MM_COST + "");
+			rowIdx++;
+		}
+		
+		int[] rowIndices = convertIntList2Array(rowIdxList);
+		int[] columnIndices = convertIntList2Array(colIdxList);
+		String[] valueMove = moveList.toArray(new String[moveList.size()]);
+		
+		// here we are wrong about the final types here. All are in string value
+		m_spreadsheet.setData(props, rowIndices, columnIndices, valueMove);
+		
+	}
+	
+	private int[] convertIntList2Array(List<Integer> valueList) {
+		int[] valueArray = new int[valueList.size()];
+		int i = 0;
+	    for (Integer v : valueList) {
+	    	valueArray[i++] = v;
+	    }
+		return valueArray;
+	}
 	
 	private void initializeClassifiers() {
 		// TODO Auto-generated method stub
