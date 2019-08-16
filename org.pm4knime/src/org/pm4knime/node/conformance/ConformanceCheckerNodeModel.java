@@ -94,7 +94,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 	private TransEvClassMapping mapping;
 	
 	RepResultPortObject repResultPO;
-	XEventClass evClassDummy = new XEventClass("dummy", 1);
+	final static XEventClass evClassDummy = new XEventClass("dummy", 1);
 	
 	// model related parameters
 	// choose algorithms to use for replay
@@ -168,7 +168,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 		
 		
 		// 
-		mapping = constructMapping(log, anet.getNet(), eventClassifier);
+		mapping = constructMapping(log, anet.getNet(), eventClassifier, evClassDummy);
 		
 		PNRepResult result = replayEngine.replayLog(pluginContext, anet.getNet(), log, mapping, parameters);
 		System.out.println("Replay result size : " + result.size());
@@ -208,8 +208,8 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
     	return bt;
     }
 
-	public static TransEvClassMapping constructMapping(XLog log, Petrinet net,  XEventClassifier eventClassifier) {
-		TransEvClassMapping mapping = new TransEvClassMapping(eventClassifier, new XEventClass("DUMMY", 99999));
+	public static TransEvClassMapping constructMapping(XLog log, Petrinet net,  XEventClassifier eventClassifier, XEventClass dummyEvent) {
+		TransEvClassMapping mapping = new TransEvClassMapping(eventClassifier, dummyEvent);
 
 		XLogInfo summary = XLogInfoFactory.createLogInfo(log, eventClassifier);
 

@@ -3,13 +3,19 @@ package org.pm4knime.node.conformance;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.deckfour.xes.classification.XEventClass;
 import org.deckfour.xes.classification.XEventClassifier;
@@ -36,7 +42,9 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
+import org.knime.core.node.defaultnodesettings.DialogComponentNumberEdit;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
+import org.knime.core.node.defaultnodesettings.SettingsModelIntegerBounded;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.knime.core.node.port.PortObject;
 import org.pm4knime.portobject.PetriNetPortObject;
@@ -54,10 +62,9 @@ import org.processmining.plugins.connectionfactories.logpetrinet.TransEvClassMap
  * @author Kefang Ding
  */
 public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
-	private static final int CFG_COST_TYPE_NUM = 6;
-	private static final int CFG_DEFAULT_LM_COST = 1;
-	private static final int CFG_DEFAULT_MM_COST = 1;
-	private static final int CFG_DEFAULT_SM_COST = 0;
+	private static final int CFG_COST_TYPE_NUM = 3;
+	private static final int[] CFG_DEFAULT_MCOST = {1,1,0};
+	
 	public static String[] CFG_MCOST_KEY = {"model move cost", "log move cost", "sync move cost"};
 	public static String[] CFG_MOVE_KEY = {"model move", "log move", "sync move"};
 	
@@ -77,6 +84,8 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
 	Spreadsheet m_spreadsheet ;
 	// to store the values from spreadsheet
 	private TableCreator2NodeSettings m_settings;
+	private SettingsModelIntegerBounded[] defaultCostModels;
+	private DialogComponentNumberEdit[] defaultCostComps;
 	
 	Map<XEventClass, Integer> mapEvClass2Cost = null;
 	Map<Transition, Integer> mapTrans2Cost = null;
@@ -99,6 +108,26 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
                 BoxLayout.Y_AXIS));
     	addTab("Options", optionPanel, true);
     	
+    	JPanel defaulCostPanel = new JPanel();
+    	defaulCostPanel.setLayout(new BoxLayout(defaulCostPanel, BoxLayout.X_AXIS));
+    	// before the m_spreadsheet, set default column values for the m_spreadsheet
+    	defaultCostModels = new SettingsModelIntegerBounded[CFG_COST_TYPE_NUM];
+    	// set the accepting field for it
+    	defaultCostComps = new DialogComponentNumberEdit[CFG_COST_TYPE_NUM];
+    	// shoule be added in group 
+    	int i=0;
+    	for( ;i< CFG_COST_TYPE_NUM -1 ; i++) {
+    		defaultCostModels[i] = new SettingsModelIntegerBounded(CFG_MCOST_KEY[i], CFG_DEFAULT_MCOST[i], 0, Integer.MAX_VALUE );
+    		defaultCostComps[i] = new DialogComponentNumberEdit(defaultCostModels[i] , CFG_MCOST_KEY[i], 5 );
+    		defaulCostPanel.add(defaultCostComps[i].getComponentPanel());
+    	}
+    	// the syn cost is set to 0 and add them into the optionPanel
+    	defaultCostModels[i] = new SettingsModelIntegerBounded(CFG_MCOST_KEY[i], CFG_DEFAULT_MCOST[i], 0, Integer.MAX_VALUE );
+		defaultCostComps[i] = new DialogComponentNumberEdit(defaultCostModels[i] , CFG_MCOST_KEY[i], 5);
+		defaulCostPanel.add(defaultCostComps[i].getComponentPanel());
+		
+		optionPanel.add(defaulCostPanel);
+		
     	m_spreadsheet = new Spreadsheet();
     	m_settings = new TableCreator2NodeSettings();
 		// check the change of m_spreadsheet, reduce the row and column numbers to show
@@ -113,7 +142,54 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
     	DialogComponentStringSelection m_ClassifierComp = new DialogComponentStringSelection(m_classifierName, "Select Classifier Name", classifierNames );
     	optionPanel.add(m_ClassifierComp.getComponentPanel());
     	
+    	// here we need to add listener in the dialog
+    	setListener();
     }
+
+	private void setListener() {
+		// TODO change the column values of m_spreadsheet according to defaultCostModel changes
+		// if all the values differ from the default value, what to do ?? Nothing here
+		for( int i=0; i< CFG_COST_TYPE_NUM ; i++) {
+			final int idx = i;// add one final to accept i
+			defaultCostModels[idx].addChangeListener(new ChangeListener() {
+				
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					// if the defaultCost changes, then the column in spreadsheet changes 
+					
+					int costValue =  defaultCostModels[idx].getIntValue();
+					changeColumnCost(idx*2 + 1, costValue);
+					
+				}
+				
+			});
+			
+			
+		}
+		
+	}
+	
+	private void changeColumnCost(int colIdx, int costValue) {
+		// TODO Auto-generated method stub
+		// current colIdx should be colIdx*2 + 1 for the real data 
+		
+		// find all the values with the colIdx is the currentIdx
+		int[] colIndices = m_spreadsheet.getColumnIndices();
+		String[] values = m_spreadsheet.getValues();
+		// get the refIdx for colIndices 
+		// List<Integer> refIdx = new ArrayList();
+		for(int i =0; i< colIndices.length; i++) {
+			if(colIndices[i] == colIdx) {
+				values[i] = costValue + "";
+				// refIdx.add(i);
+			}
+		}
+		
+		// after chaning the value, repaint the graph
+		m_spreadsheet.setData(m_spreadsheet.getColumnProperties(), 
+				m_spreadsheet.getRowIndices(), m_spreadsheet.getColumnIndices(), values);
+		// m_spreadsheet.repaint();
+	}
 
 	@Override
 	protected void saveSettingsTo(NodeSettingsWO settings) throws InvalidSettingsException {
@@ -191,30 +267,48 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
 			XEventClassifier eventClassifier = new XEventNameClassifier();
 			XLogInfo summary = XLogInfoFactory.createLogInfo(log, eventClassifier);
 			
-			TransEvClassMapping mapping = ConformanceCheckerNodeModel.constructMapping(log, anet.getNet(), eventClassifier);
+			XEventClass evClassDummy = ConformanceCheckerNodeModel.evClassDummy;
+			TransEvClassMapping mapping = ConformanceCheckerNodeModel.constructMapping(log, anet.getNet(), eventClassifier, evClassDummy);
 			
 			Collection<XEventClass> eventClasses =  summary.getEventClasses().getClasses();
 			// add one dummy event class here, to make sure they are the one, we can add other value 
 			
 			Collection<Transition> transitions = anet.getNet().getTransitions();
+
+			SortedSet<String> ecSet = new TreeSet<>();
+			for(XEventClass ec : eventClasses) {
+				ecSet.add(ec.getId());
+			}
+			ecSet.add(evClassDummy.getId());
 			
-			setCostTable(eventClasses, transitions, mapping);
+			SortedSet<String> tSet = new TreeSet();
+			for(Transition t: transitions) {
+				tSet.add(t.getLabel());
+			}
+			
+			SortedSet<String> sSet = new TreeSet();
+			for(Transition t: mapping.keySet()) {
+				sSet.add(t.getLabel() +" : "  +mapping.get(t).getId());
+			}
+			
+			
+			// to show in the table, we just need the name of transitions, 
+			// so we can create another container to store the values here! Not use the collection methods
+			setCostTable(ecSet, tSet, sSet);
 		}
 		
 	}
 	
 	// we create 1 table for three types of cost to show them at first, but based on the spreadsheet 
 	// without classifier at first
-	private void setCostTable(Collection<XEventClass> eventClasses, Collection<Transition> transitions, TransEvClassMapping mapping ) {
+	private void setCostTable(Collection<String> ecSet, Collection<String> tSet, Collection<String> sSet ) {
 		
-		SortedMap<Integer, ColProperty> m_colProps = new TreeMap<Integer, ColProperty>();
-		
-		DataColumnSpec[] specs = new DataColumnSpec[CFG_COST_TYPE_NUM];
+		DataColumnSpec[] specs = new DataColumnSpec[CFG_COST_TYPE_NUM*2];
 		
 		SortedMap<Integer, ColProperty> props = new TreeMap();
 		
 		int i=0;
-		while(i < CFG_COST_TYPE_NUM) {
+		while(i < CFG_COST_TYPE_NUM*2) {
 			specs[i] = new DataColumnSpecCreator(CFG_MOVE_KEY[i/2], StringCell.TYPE).createSpec();
 			ColProperty moveNamePro = new ColProperty();
 			moveNamePro.setColumnSpec(specs[i]);
@@ -229,7 +323,7 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
 			moveCostPro.setColumnSpec(specs[i]);
 			moveCostPro.setUserSettings(false);
 			// set default cost as 1
-			moveCostPro.setMissingValuePattern(CFG_DEFAULT_LM_COST+"");
+			moveCostPro.setMissingValuePattern(CFG_DEFAULT_MCOST[i/2]+"");
 			props.put(i, moveCostPro);
 			
 			i++;
@@ -241,61 +335,30 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
 		// List<Integer> moveCostList = new ArrayList();
 		// List<String> moveNameList = new ArrayList();
 		List<String> moveList = new ArrayList();
+		List<Collection<String>> nameList = new ArrayList();
+		nameList.add(ecSet);
+		nameList.add(tSet);
+		nameList.add(sSet);
 		
-		// for event classes the name and cost, we list here
-		int colIdx = 0;
-		int rowIdx = 0;
-		for(XEventClass eClass :  eventClasses) {
-			// column 0 and 1 we need to use it
-			rowIdxList.add(rowIdx);
-			colIdxList.add(colIdx);
-			moveList.add(eClass.getId());
+		for(int colIdx = 0 ; colIdx < CFG_COST_TYPE_NUM*2; colIdx +=2 ) {
+			Collection<String> nSet = nameList.get(colIdx/2);
 			
-			rowIdxList.add(rowIdx);
-			colIdxList.add(colIdx + 1);
-			moveList.add(CFG_DEFAULT_LM_COST+"");
+			int rowIdx = 0;
+			for(String name :  nSet) {
+				// column 0 and 1 we need to use it
+				rowIdxList.add(rowIdx);
+				colIdxList.add(colIdx);
+				moveList.add(name);
+				
+				rowIdxList.add(rowIdx);
+				colIdxList.add(colIdx + 1);
+				moveList.add(CFG_DEFAULT_MCOST[colIdx/2]+"");
+				
+				rowIdx++;
+			}
 			
-			rowIdx++;
 		}
 		
-		// add values for dummy event class 
-		XEventClass evClassDummy = new XEventClass("dummy", 1);
-		rowIdxList.add(rowIdx);
-		colIdxList.add(colIdx);
-		moveList.add(evClassDummy.getId());
-		
-		rowIdxList.add(rowIdx);
-		colIdxList.add(colIdx + 1);
-		moveList.add(CFG_DEFAULT_LM_COST+"");
-		
-		colIdx += 2;
-		// for transition the name and cost, we list here
-		rowIdx = 0;
-		for(Transition t:  transitions) {
-			// column 0 and 1 we need to use it
-			rowIdxList.add(rowIdx);
-			colIdxList.add(colIdx);
-			moveList.add(t.getLabel());
-			
-			rowIdxList.add(rowIdx);
-			colIdxList.add(colIdx + 1);
-			moveList.add(CFG_DEFAULT_MM_COST+"");
-			rowIdx ++;
-		}
-		colIdx += 2;
-		// for transition the name and cost, we list here
-		rowIdx = 0;
-		for(Transition t : mapping.keySet()) {
-			// column 0 and 1 we need to use it
-			rowIdxList.add(rowIdx);
-			colIdxList.add(colIdx);
-			moveList.add(t.getLabel() +" : "  +mapping.get(t).getId());
-			
-			rowIdxList.add(rowIdx);
-			colIdxList.add(colIdx + 1);
-			moveList.add(CFG_DEFAULT_MM_COST + "");
-			rowIdx++;
-		}
 		
 		int[] rowIndices = convertIntList2Array(rowIdxList);
 		int[] columnIndices = convertIntList2Array(colIdxList);

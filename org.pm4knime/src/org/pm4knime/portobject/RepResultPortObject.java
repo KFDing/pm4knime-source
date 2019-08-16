@@ -93,7 +93,7 @@ public class RepResultPortObject implements PortObject {
 		PluginContext context = PM4KNIMEGlobalContext.instance().getPluginContext();
 		// if we need to the log information, how to serialize it?? We don't need to serialize the log, I think..
 		PNLogReplayResultVisPanel resutPanel = new PNLogReplayResultVisPanel(xlogPO.getLog(), repResult, context.getProgress());
-		resutPanel.setBackground(Color.BLACK);
+		// resutPanel.setBackground(Color.BLACK);
 		return new JComponent[] {resutPanel};
 		
 		
