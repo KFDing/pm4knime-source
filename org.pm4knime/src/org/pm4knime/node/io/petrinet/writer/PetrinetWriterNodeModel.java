@@ -96,7 +96,7 @@ public class PetrinetWriterNodeModel extends NodeModel {
         	
 			// we should also write the marking into disk
         	FileOutputStream out = new FileOutputStream(f);
-        	out.write(pnObj.convert2String().getBytes());
+        	out.write(PetriNetPortObject.convert2String(pnObj.getANet()).getBytes());
     		out.close();
         }
         

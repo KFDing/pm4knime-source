@@ -3,6 +3,7 @@ package org.pm4knime.portobject;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.zip.ZipEntry;
 
 import javax.swing.JComponent;
@@ -73,20 +74,27 @@ public class PetriNetPortObject  implements PortObject{
 		return m_anet.equals(o);
 	}
 	
-	public String convert2String() {
+	public static String convert2String(AcceptingPetriNet anet) {
 		PnmlElementFactory factory = new FullPnmlElementFactory();
 		Pnml pnml = new Pnml();
 		synchronized (factory) {
 			pnml.setFactory(factory);
 			
-			GraphLayoutConnection  layout = new GraphLayoutConnection(m_anet.getNet());
+			GraphLayoutConnection  layout = new GraphLayoutConnection(anet.getNet());
 			
-			pnml = new Pnml().convertFromNet(m_anet.getNet(), m_anet.getInitialMarking(), m_anet.getFinalMarkings(), layout);
+			pnml = new Pnml().convertFromNet(anet.getNet(), anet.getInitialMarking(), anet.getFinalMarkings(), layout);
 			pnml.setType(PnmlType.PNML);
 		}
 		
 		String text = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" + pnml.exportElement(pnml);
 		return text;
+	}
+	
+	public static AcceptingPetriNet convert2ANet(InputStream in) throws Exception {
+		PluginContext context =  PM4KNIMEGlobalContext.instance().getPM4KNIMEPluginContext();
+		AcceptingPetriNet anet = AcceptingPetriNetFactory.createAcceptingPetriNet();
+		anet.importFromStream(context, in);
+		return anet;
 	}
 	
 	@Override
@@ -125,7 +133,7 @@ public class PetriNetPortObject  implements PortObject{
 			// do we need the layout to import or export the AccepingPetrinet??
 			// we can't use the ObjectOutputStream, because AcceptingPetrinet not serialized..
 			// recode it from AcceptingPetriNetImpl.exportToFile()
-			out.write(portObject.convert2String().getBytes());
+			out.write(convert2String(portObject.getANet()).getBytes());
 			out.closeEntry();
 			out.close();
 			
@@ -145,10 +153,7 @@ public class PetriNetPortObject  implements PortObject{
 				// they put layout information into context, if we want to show the them, 
 				// we need to keep the context the same in load and save program. But how to do this??
 				// that's why there is context in portObject. If we also save the context, what can be done??
-				PluginContext context =  PM4KNIMEGlobalContext.instance().getPM4KNIMEPluginContext();
-				AcceptingPetriNet anet = AcceptingPetriNetFactory.createAcceptingPetriNet();
-				anet.importFromStream(context, in);
-				
+				AcceptingPetriNet anet = convert2ANet(in);
 				result = new PetriNetPortObject(anet);
 				
 			} catch (Exception e) {

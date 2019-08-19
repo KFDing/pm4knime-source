@@ -115,16 +115,17 @@ public class ConformanceCheckerNodeDialog extends DataAwareNodeDialogPane {
     	// set the accepting field for it
     	defaultCostComps = new DialogComponentNumberEdit[CFG_COST_TYPE_NUM];
     	// shoule be added in group 
-    	int i=0;
-    	for( ;i< CFG_COST_TYPE_NUM -1 ; i++) {
+    	
+    	for( int i=0; i< CFG_COST_TYPE_NUM ; i++) {
     		defaultCostModels[i] = new SettingsModelIntegerBounded(CFG_MCOST_KEY[i], CFG_DEFAULT_MCOST[i], 0, Integer.MAX_VALUE );
     		defaultCostComps[i] = new DialogComponentNumberEdit(defaultCostModels[i] , CFG_MCOST_KEY[i], 5 );
     		defaulCostPanel.add(defaultCostComps[i].getComponentPanel());
     	}
-    	// the syn cost is set to 0 and add them into the optionPanel
-    	defaultCostModels[i] = new SettingsModelIntegerBounded(CFG_MCOST_KEY[i], CFG_DEFAULT_MCOST[i], 0, Integer.MAX_VALUE );
-		defaultCostComps[i] = new DialogComponentNumberEdit(defaultCostModels[i] , CFG_MCOST_KEY[i], 5);
-		defaulCostPanel.add(defaultCostComps[i].getComponentPanel());
+    	// the syn cost is set to 0 and add them into the optionPanel, 
+    	// put the syncost into the same loop like before we have
+//    	defaultCostModels[i] = new SettingsModelIntegerBounded(CFG_MCOST_KEY[i], CFG_DEFAULT_MCOST[i], 0, Integer.MAX_VALUE );
+//		defaultCostComps[i] = new DialogComponentNumberEdit(defaultCostModels[i] , CFG_MCOST_KEY[i], 5);
+//		defaulCostPanel.add(defaultCostComps[i].getComponentPanel());
 		
 		optionPanel.add(defaulCostPanel);
 		

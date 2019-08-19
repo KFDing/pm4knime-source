@@ -21,6 +21,7 @@ import org.knime.core.node.port.PortObjectZipInputStream;
 import org.knime.core.node.port.PortObjectZipOutputStream;
 import org.knime.core.node.port.PortObject.PortObjectSerializer;
 import org.pm4knime.util.connectors.prom.PM4KNIMEGlobalContext;
+import org.processmining.acceptingpetrinet.models.AcceptingPetriNet;
 import org.processmining.framework.plugin.PluginContext;
 import org.processmining.models.graphbased.NodeID;
 import org.processmining.models.graphbased.directed.AbstractDirectedGraph;
@@ -28,6 +29,7 @@ import org.processmining.models.graphbased.directed.petrinet.Petrinet;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetEdge;
 import org.processmining.models.graphbased.directed.petrinet.PetrinetNode;
 import org.processmining.models.graphbased.directed.petrinet.elements.Transition;
+import org.processmining.models.graphbased.directed.petrinet.impl.PetrinetFactory;
 import org.processmining.plugins.petrinet.replayresult.PNRepResult;
 import org.processmining.plugins.petrinet.replayresult.PNRepResultImpl;
 import org.processmining.plugins.petrinet.replayresult.StepTypes;
@@ -75,6 +77,9 @@ public class RepResultPortObject implements PortObject {
 		return repResult;
 	}
 	
+	public XLogPortObject getLogPO() {
+		return xlogPO;
+	}
 	@Override
 	public String getSummary() {
 		// TODO Auto-generated method stub
@@ -91,10 +96,13 @@ public class RepResultPortObject implements PortObject {
 	public JComponent[] getViews() {
 		// TODO Auto-generated method stub
 		PluginContext context = PM4KNIMEGlobalContext.instance().getPluginContext();
-		// if we need to the log information, how to serialize it?? We don't need to serialize the log, I think..
-		PNLogReplayResultVisPanel resutPanel = new PNLogReplayResultVisPanel(xlogPO.getLog(), repResult, context.getProgress());
+		// if we need to the log information, how to serialize it?? 
+		// reopening this workflow, we need to load event log such that we can show the portobject;
+		// but one step is here, not know how to do this..
+		PNLogReplayResultVisPanel resultPanel = new PNLogReplayResultVisPanel(xlogPO.getLog(), repResult, context.getProgress());
 		// resutPanel.setBackground(Color.BLACK);
-		return new JComponent[] {resutPanel};
+		resultPanel.setName("Alignment Projection");
+		return new JComponent[] {resultPanel};
 		
 		
 	}
@@ -141,7 +149,16 @@ public class RepResultPortObject implements PortObject {
 						objOut.writeUTF(t.getLabel());
 						objOut.writeObject(t.getId());
 						// objOut.writeObject(t.getLocalID());
-						objOut.writeObject(t.getGraph());
+						// here how to serialize a graph??
+						// we can't serializa for each transition like this way, 
+						// one object but multiple references, t.getGraph only has the Petri net,
+						// do we need to store all of those information here, if not what we can do??
+						// we just have the basic information of transitions, but not the net;;
+						// if we recover the process, what to do?? We will check it when we use it!!
+						// because for event log, we need to save it there, for the transition it should work in this way, too
+//						AcceptingPetriNet anet = (AcceptingPetriNet) t.getGraph();
+//						// should we follow the same procedure like Petrinet, but it has the convert let me see
+//						objOut.writeObject(PetriNetPortObject.convert2String(anet).getBytes());
 						
 					}
 				}
@@ -152,10 +169,12 @@ public class RepResultPortObject implements PortObject {
 				objOut.writeBoolean(alignment.isReliable());
 				objOut.writeObject(alignment.getInfo());
 			}
+			// can not save the portObject there
+			portObject.getLogPO().save(out, exec);
 			
 			objOut.close();
 			
-			out.close();
+			// out.close();
 			System.out.println("Exit the save PO in serializer");
 		}
 
@@ -197,16 +216,20 @@ public class RepResultPortObject implements PortObject {
 							nodeInstances.add(ecls);
 						}else if(classType.equals(Transition.class.getName())) {
 							String label = inObj.readUTF();
-							AbstractDirectedGraph<PetrinetNode, PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode>> net = null ;
+							Petrinet net = PetrinetFactory.newPetrinet("Temprorary Petri net for RepResult Loading");
 							try {
 								NodeID nId  = (NodeID) inObj.readObject();
-								net = (AbstractDirectedGraph)inObj.readObject();
+								// here how to serialize the object is a problem
+								// it only reads bytes list, we need to convert the object into a net again
+								// !! Be careful about the converting and casting part
+								// net = (AbstractDirectedGraph<PetrinetNode, PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode>>) PetriNetPortObject.convert2ANet(inObj);
 								
-							} catch (ClassNotFoundException e) {
+							} catch (Exception e) {
 								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
-							Transition t = new Transition(label, net);
+							// but here we need to have the transition with net, so we can store them all, but do we need ??
+							Transition t = new Transition(label, (AbstractDirectedGraph<PetrinetNode, PetrinetEdge<? extends PetrinetNode, ? extends PetrinetNode>>) net);
 							nodeInstances.add(t);
 						}
 						
@@ -231,18 +254,25 @@ public class RepResultPortObject implements PortObject {
 					}
 					
 				}
-			
+			XLogPortObject logPO = new XLogPortObject();
+			logPO.load(in, null, exec);
 			
 			inObj.close();
 			
-			repResultPO.setRepResult(new PNRepResultImpl(col));
 			
+			repResultPO.setRepResult(new PNRepResultImpl(col));
+			repResultPO.setLogPO(logPO);
 			in.close();
 			System.out.println("Exit the load PO in serializer");
 			return repResultPO;
 		}
 
 		// end of the serializaer
+	}
+
+	public void setLogPO(XLogPortObject logPO) {
+		// TODO Auto-generated method stub
+		xlogPO = logPO;
 	}
 
 }

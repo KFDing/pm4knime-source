@@ -85,9 +85,6 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 	
 	protected static final int INPORT_LOG = 0;
 	protected static final int INPORT_PETRINET = 1;
-
-	private static final int OUTPORT_FITNESS = 0;
-	private static final int OUTPORT_ALIGNMENT = 1;
 	
 	private XLogPortObject logPO ;
 	private PetriNetPortObject netPO ;
@@ -183,7 +180,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
     }
     
     
-	private BufferedDataTable createInfoTable(Map<String, Object> info, final ExecutionContext exec) {
+	public static BufferedDataTable createInfoTable(Map<String, Object> info, final ExecutionContext exec) {
     	
     	DataColumnSpec[] cSpec = new DataColumnSpec[2];
     	cSpec[0] = new DataColumnSpecCreator("Type", StringCell.TYPE).createSpec();
@@ -303,10 +300,9 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 	
 	private IPNReplayParameter createCostParameter(Collection<XEventClass> eventClasses, Collection<Transition> tCol) {
 		
-		Map<XEventClass, Integer> mapEvClass2Cost = new HashMap();;
 		// put dummy transition into the map
-		
 		Map<Transition, Integer> mapTrans2Cost = new HashMap();
+		Map<XEventClass, Integer> mapEvClass2Cost = new HashMap();
 		Map<Transition, Integer> mapSync2Cost = new HashMap();
 		
 		int[] rowIndices = m_costSettings.getRowIndices();
@@ -317,7 +313,16 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 		for(int i=0; i< rowIndices.length ; i += 2) {
 			// currently, rowIdx=rowIdx = 0, colIdx=0, colIdx = 1, values = A,1; 
 			switch(colIndices[i]) {
-			case 0: // the first log move name 
+			case 0: // the first model move name 
+				String transitionName = valueList[i];
+				// find the corresponding event class
+				Transition t = findTransition(transitionName, tCol);
+				
+				int mmCost = Integer.valueOf(valueList[i+1]);
+				mapTrans2Cost.put(t, mmCost);
+				
+				break;
+			case 2: // log  move name and cost 
 				
 				String eventName = valueList[i];
 				// find the corresponding event class
@@ -325,15 +330,6 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 				
 				int lmCost = Integer.valueOf(valueList[i+1]);
 				mapEvClass2Cost.put(eClass, lmCost);
-				
-				break;
-			case 2: // model  move name and cost 
-				String transitionName = valueList[i];
-				// find the corresponding event class
-				Transition t = findTransition(transitionName, tCol);
-				
-				int mmCost = Integer.valueOf(valueList[i+1]);
-				mapTrans2Cost.put(t, mmCost);
 				break;
 			case 4:
 				String stName = valueList[i];
