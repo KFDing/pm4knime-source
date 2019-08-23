@@ -32,9 +32,10 @@ public class XLogReaderNodeModel extends NodeModel {
 	// the logger instance
 	private static final NodeLogger logger = NodeLogger.getLogger(XLogReaderNodeModel.class);
 	private final XLogReaderNodeSettingsModel params = new XLogReaderNodeSettingsModel();
-
-	// private XLogPortObjectSpec outSpec ;
 	
+	XLogPortObject logPO;
+	// private XLogPortObjectSpec outSpec ;
+
 	protected XLogReaderNodeModel() {
 		super(new PortType[] {},
 				new PortType[] { PortTypeRegistry.getInstance().getPortType(XLogPortObject.class, false) });
@@ -48,9 +49,9 @@ public class XLogReaderNodeModel extends NodeModel {
 		OpenNaiveLogFilePlugin plugin = new OpenNaiveLogFilePlugin();
 		result = (XLog) plugin.importFile(
 				PM4KNIMEGlobalContext.instance().getFutureResultAwarePluginContext(OpenNaiveLogFilePlugin.class), file);
-		XLogPortObject po = new XLogPortObject();
+		logPO = new XLogPortObject();
 		
-		po.setLog(result);
+		logPO.setLog(result);
 		logger.info("end: import event log");
 		
 		// System.out.println("print the value of outspec"+ outSpec.toString());
@@ -63,9 +64,18 @@ public class XLogReaderNodeModel extends NodeModel {
 			
 		}
 		
-		return new PortObject[] { po };
+		return new PortObject[] { logPO };
 	}
 
+	public XLogPortObject getLogPO() {
+		return logPO;
+	}
+
+	public XLogReaderNodeSettingsModel getParams() {
+		return params;
+	}
+
+	
 	@Override
 	protected PortObjectSpec[] configure(PortObjectSpec[] inSpecs) {
 		// TODO: delete the SpecCreator class here and don't use 

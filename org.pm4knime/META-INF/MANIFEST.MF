@@ -3,8 +3,8 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Process Mining extension for KNIME Workbench
 Bundle-SymbolicName: org.pm4knime;singleton:=true
 Bundle-Version: 0.0.1
-Bundle-ClassPath: .,  src/,
-   lib/TableLayout-20050920.jar,
+Bundle-ClassPath: .,  src/, 
+ lib/TableLayout-20050920.jar,
  lib/flanagan-0.9alpha.jar,
  lib/jgraph-5.13.0.4.jar,
  lib/jung-graph-impl-2.0.jar,
@@ -165,7 +165,14 @@ Bundle-ClassPath: .,  src/,
  lib/HeuristicsMiner-latest.jar,
  lib/GuideTreeMiner-latest.jar,
  lib/PNetAlignmentAnalysis-latest.jar,
- lib/TraceAlignmentWithGuideTree-latest.jar
+ lib/TraceAlignmentWithGuideTree-latest.jar,
+ lib/dictomaton-1.2.1.jar,
+ lib/high-scale-lib-1.1.4.jar,
+ lib/java-sizeof-0.0.5.jar,
+ lib/XESLite-latest.jar,
+ lib/LogProjection-latest.jar,
+ lib/LogEnhancement-latest.jar,
+ lib/DataAwareReplayer-latest.jar
 Bundle-Activator: org.pm4knime.util.PM4KNIMENodePlugin
 Bundle-Vendor: RWTH Aachen / Fraunhofer FIT
 Require-Bundle: org.eclipse.core.runtime,

@@ -70,7 +70,7 @@ public class InductiveMinerNodeModel extends NodeModel {
 	public static final String CFGKEY_METHOD_TYPE = "InductiveMinerMethod";
 
 	public static final String CFGKEY_NOISE_THRESHOLD = "NoiseThreshold";
-	public static final String CFGKEY_CLASSIFIER = "classifier";
+	public static final String CFGKEY_CLASSIFIER = "Classifier";
 	
 	private static boolean withNoiseThreshold = false;
 

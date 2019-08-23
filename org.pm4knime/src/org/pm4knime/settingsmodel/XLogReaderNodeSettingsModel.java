@@ -77,6 +77,7 @@ public class XLogReaderNodeSettingsModel extends SettingsModel {
 		filePath.setStringValue(settings.getString(CFG_KEY_FILE_PATH, CFG_DEFAULT_VALUE_FILE_PATH));
 		importer.setImporterStr(settings.getString(CFG_KEY_IMPORTER, CFG_DEFAULT_VALUE_IMPORTER.toString()));
 		notifyChangeListeners();
+		
 	}
 
 	@Override

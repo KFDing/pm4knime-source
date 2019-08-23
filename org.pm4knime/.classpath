@@ -219,5 +219,14 @@
 	<classpathentry kind="lib" path="lib/GuideTreeMiner-latest.jar"/>
 	<classpathentry kind="lib" path="lib/PNetAlignmentAnalysis-latest.jar"/>
 	<classpathentry kind="lib" path="lib/TraceAlignmentWithGuideTree-latest.jar"/>
+	<classpathentry kind="lib" path="lib/LogProjection-latest.jar"/>
+	<classpathentry kind="lib" path="lib/LogEnhancement-latest.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.emf.common-2.7.0.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.emf.ecore-2.8.3.v20130125-0546.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.emf.ecore.xmi-2.5.0.v20100521-1846.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.uml2.common-1.5.0.v201005031530.jar"/>
+	<classpathentry kind="lib" path="lib/org.eclipse.uml2.uml-3.1.2.v201010261927.jar"/>
+	<classpathentry kind="lib" path="lib/org.mozilla.javascript-1.7.2.jar"/>
+	<classpathentry kind="lib" path="lib/DataAwareReplayer-latest.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

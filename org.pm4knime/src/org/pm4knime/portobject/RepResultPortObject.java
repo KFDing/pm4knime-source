@@ -261,7 +261,7 @@ public class RepResultPortObject implements PortObject {
 			
 			
 			repResultPO.setRepResult(new PNRepResultImpl(col));
-			repResultPO.setLogPO(logPO);
+			// repResultPO.setLogPO(logPO);
 			in.close();
 			System.out.println("Exit the load PO in serializer");
 			return repResultPO;

@@ -1,11 +1,14 @@
 package org.pm4knime.node.discovery.heuritsicsminer;
 
+import java.awt.Dimension;
+
+import javax.swing.BoxLayout;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 
 import org.knime.core.node.NodeView;
 import org.processmining.models.heuristics.HeuristicsNet;
 import org.processmining.models.heuristics.HeuristicsNetGraph;
-import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.gui.HeuristicsNetVisualization;
 import org.processmining.plugins.heuristicsnet.miner.heuristics.miner.gui.HeuristicsNetVisualizer;
 import org.processmining.plugins.heuristicsnet.visualizer.annotatedvisualization.AnnotatedVisualizationGenerator;
 import org.processmining.plugins.heuristicsnet.visualizer.annotatedvisualization.AnnotatedVisualizationSettings;
@@ -34,8 +37,12 @@ public class HeuristicsMinerNodeView extends NodeView<HeuristicsMinerNodeModel> 
 		HeuristicsNetGraph graph = generator.generate(hnet, settings);
 		
 		m_hnetVisualization = HeuristicsNetVisualizer.visualizeGraph(graph, hnet, settings, null);
-		m_hnetVisualization.setSize(500, 400);
-		setComponent(m_hnetVisualization);
+		
+		JPanel viewPanel = new JPanel();
+		viewPanel.setLayout(new BoxLayout(viewPanel, BoxLayout.Y_AXIS));
+		viewPanel.setPreferredSize(new Dimension(1000,600));
+		viewPanel.add(m_hnetVisualization);
+		setComponent(viewPanel);
 		
     }
 

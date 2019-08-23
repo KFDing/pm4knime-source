@@ -13,12 +13,12 @@ public class XLogReaderNodeFactory extends NodeFactory<XLogReaderNodeModel> {
 
 	@Override
 	protected int getNrNodeViews() {
-		return 0;
+		return 2;
 	}
 
 	@Override
 	public NodeView<XLogReaderNodeModel> createNodeView(int viewIndex, XLogReaderNodeModel nodeModel) {
-		return null;
+		return new XLogReaderNodeView(viewIndex, nodeModel);
 	}
 
 	@Override

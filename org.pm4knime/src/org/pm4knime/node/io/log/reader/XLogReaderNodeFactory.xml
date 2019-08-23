@@ -10,18 +10,8 @@
         <intro>This node imports an event log</intro>
         
         
-        <option name="short name of first option (like in the dialog)">description of first option</option>
-        <option name="short name of second option (like in the dialog)">description of second option</option>
-        <!-- possibly more options that can also be grouped by tabs -->
-        <!--
-        <tab name="Standard Options">
-            <option name="short name of first option (like in the dialog)">description of first option</option>
-            <option name="short name of second option (like in the dialog)">description of second option</option>
-        </tab>
-        <tab name="Advanced Options">
-            <option name="short name of first advanced option (like in the dialog)">description of first advanced option</option>
-        </tab>
-        -->
+        <option name="Import File Name">File name to import event log</option>
+        
     </fullDescription>
     
     <ports>
@@ -30,8 +20,9 @@
         <outPort index="0" name="Event Log">The Event Log</outPort>
         <!-- possibly more output ports here-->
     </ports>    
-    <!--views-->
-        <!--view index="0" name="name of first view">Description of first view...</view-->
+    <views>
+        <view index="0" name="Log Trace View">View trace variant in log</view>
+        <view index="1" name="Dotted Chart View">Dotted Chart for Log View</view>
         <!--view index="1" name="name of second view">Description of second view...</view-->
-    <!--/views-->
+    </views>views
 </knimeNode>
