@@ -61,7 +61,7 @@ public class ProcessTreeReaderNodeModel extends NodeModel {
     	logger.info("begin of reading of Petri net");
     	ProcessTreePortObject m_ptPort = new ProcessTreePortObject();
     	// this is something different, becauser here we have in?? but how it this type now?
-    	m_ptPort.setSpec(m_spec);
+    	// m_ptPort.setSpec(m_spec);
     	m_ptPort.loadFrom(m_spec.getFileName());
     	
     	logger.info("end of reading of Petri net");

@@ -26,7 +26,7 @@ public class DFMMinerNodeDialog extends DefaultNodeSettingsPane {
     	m_clf = new SettingsModelString(DFMMinerNodeModel.CFG_CLASSIFIER_KEY, "");
     	m_lcClf = new SettingsModelString(DFMMinerNodeModel.CFG_LCC_KEY, "");
     	
-    	DialogComponentNumber noiseThresholdComponent = new DialogComponentNumber(m_noiseThreshold, "Write the Noise Threshold", 0.8);
+    	DialogComponentNumber noiseThresholdComponent = new DialogComponentNumber(m_noiseThreshold, "Set Fitness Threshold", 0.8);
     	DialogComponentStringSelection clfComp = new DialogComponentStringSelection(m_clf, "Select Classifier", DFMMinerNodeModel.defaultClfNames);
     	
     	DialogComponentStringSelection lcClfComp = new DialogComponentStringSelection(m_lcClf, "Select LifeCycle Classifier", DFMMinerNodeModel.defaultLcClfNames);

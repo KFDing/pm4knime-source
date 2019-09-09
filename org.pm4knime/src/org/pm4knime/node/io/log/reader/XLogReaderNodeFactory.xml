@@ -24,5 +24,5 @@
         <view index="0" name="Log Trace View">View trace variant in log</view>
         <view index="1" name="Dotted Chart View">Dotted Chart for Log View</view>
         <!--view index="1" name="name of second view">Description of second view...</view-->
-    </views>views
+    </views>
 </knimeNode>

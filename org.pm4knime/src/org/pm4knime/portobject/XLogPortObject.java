@@ -42,7 +42,12 @@ public class XLogPortObject extends AbstractPortObject {
 
 	private XLog log = null;
 
-	
+	public XLogPortObject() {}
+	public XLogPortObject(XLog log) {
+		// TODO Auto-generated constructor stub
+		this.log = log;
+	}
+
 	public XLog getLog() {
 		return log;
 	}
