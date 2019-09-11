@@ -37,7 +37,7 @@ import org.processmining.log.utils.XUtils;
  * @author kefang-pads
  * @reference org.processmining.log.csvimport.handler.XESConversionHandlerImpl
  */
-public class XESHandler {
+public class ToXLogConverter {
 
 	private static Pattern INVALID_MS_PATTERN = Pattern.compile("(:[0-5][0-9]\\.[0-9]{3})[0-9]*$");
 	
@@ -217,7 +217,10 @@ public class XESHandler {
 		currentEvents.clear();
 		errorDetected = false;
 		currentTrace = factory.createTrace();
-		
+		// what if sth attributes are trace attributes?? how to classify this stuff??
+		// it will totally different, if we have set some values there as the trace attributes;
+		// we will assign attributes to trace, but also to global attributes there
+		// we need to do it there
 		assignName(factory, currentTrace, caseId);
 	}
 

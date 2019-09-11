@@ -36,6 +36,7 @@
 <node category-path="/processmining/discovery" factory-class="org.pm4knime.node.discovery.dfgminer.DFMMinerNodeFactory" id="org.pm4knime.node.discovery.dfgminer.DFMMinerNodeFactory"/>
 <node category-path="/processmining/discovery" factory-class="org.pm4knime.node.discovery.dfgminer.DFM2PMNodeFactory" id="org.pm4knime.node.discovery.dfgminer.DFM2PMNodeFactory"/>
 <node category-path="/processmining/conversion" factory-class="org.pm4knime.node.conversion.csv2log.CSV2XLogConverterNodeFactory" id="org.pm4knime.node.conversion.CVS2XLogConverterNodeFactory"/>
+<node category-path="/processmining/conversion" factory-class="org.pm4knime.node.conversion.log2csv.XLog2CSVConverterNodeFactory" id="org.pm4knime.node.conversion.log2csv.XLog2CSVConverterNodeFactory"/>
 </extension>
     <extension point="org.knime.core.PortType">
        <portType hidden="false" name="Event Log" objectClass="org.pm4knime.portobject.XLogPortObject" objectSerializer="org.pm4knime.portobject.XLogPortObject$XLogPortObjectSerializer" specClass="org.pm4knime.portobject.XLogPortObjectSpec" specSerializer="org.pm4knime.portobject.XLogPortObjectSpec$XLogPortObjectSpecSerializer">

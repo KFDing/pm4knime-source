@@ -84,7 +84,7 @@ public class CSV2XLogConverterNodeModel extends NodeModel {
     	// convert the string to date and sort them according to caseID? So we can read them easier for rows
     	// it creates the corresponding column spec and create another DataTable for it.
     	// one thing to remember, it is not so important to have order of timestamp. 
-    	XESHandler handler = new XESHandler();
+    	ToXLogConverter handler = new ToXLogConverter();
     	handler.setConfig(m_config);
     	handler.convertCVS2Log(sortedTable);
     	XLog log = handler.getXLog();
