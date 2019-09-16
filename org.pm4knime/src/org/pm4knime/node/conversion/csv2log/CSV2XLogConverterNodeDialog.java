@@ -13,8 +13,10 @@ import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.NotConfigurableException;
 import org.knime.core.node.defaultnodesettings.DefaultNodeSettingsPane;
 import org.knime.core.node.defaultnodesettings.DialogComponentBoolean;
+import org.knime.core.node.defaultnodesettings.DialogComponentColumnFilter;
 import org.knime.core.node.defaultnodesettings.DialogComponentStringSelection;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelFilterString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 
 /**
@@ -31,11 +33,13 @@ public class CSV2XLogConverterNodeDialog extends DefaultNodeSettingsPane {
 	private SettingsModelString m_startTime, m_completeTime;
 	private SettingsModelString m_sFormat, m_cFormat;
 	private SettingsModelBoolean m_withSTime;
-	
+	private SettingsModelFilterString m_traceAttrSet , m_eventAttrSet;
 	CSV2XLogConfigModel config;
 	
 	DialogComponentStringSelection caseIDComp, eventIDComp, sTimeComp, cTimeComp; 
+	DialogComponentBoolean withSTimeComp;
 	DialogComponentStringSelection sFormatComp, cFormatComp;
+	DialogComponentColumnFilter m_traceAttrFilterComp, m_eventAttrFilterComp;
     /**
      * New pane for configuring the CVS2XLogConverter node.
      */
@@ -48,8 +52,8 @@ public class CSV2XLogConverterNodeDialog extends DefaultNodeSettingsPane {
     	// if there is no start time or complete time, how to set them there is not chosen then??
     	
     	// another panel is about the advanced configuration here
-    	config = new CSV2XLogConfigModel();
-    	
+    	// config = new CSV2XLogConfigModel();
+    	config = CSV2XLogConverterNodeModel.m_config;
     	// add caseID choose to the panel
     	m_caseID = config.getMCaseID();
     	caseIDComp = new DialogComponentStringSelection(m_caseID, 
@@ -78,7 +82,7 @@ public class CSV2XLogConverterNodeDialog extends DefaultNodeSettingsPane {
     		
     	// start time choice but as an option
     	m_withSTime = config.getMWithSTime();
-    	DialogComponentBoolean withSTimeComp = new DialogComponentBoolean(m_withSTime, "With Start Time");
+    	withSTimeComp = new DialogComponentBoolean(m_withSTime, "With Start Time");
     	addDialogComponent(withSTimeComp);
     	
     	
@@ -91,15 +95,27 @@ public class CSV2XLogConverterNodeDialog extends DefaultNodeSettingsPane {
     	addDialogComponent(sTimeComp);
     	// set the format to change string to date format
     	m_sFormat = config.getMSFormat();
-    	m_sFormat.setEnabled(m_withSTime.getBooleanValue());
+    	
         sFormatComp = new DialogComponentStringSelection(m_sFormat, "Date format: ",
         		CSV2XLogConfigModel.createPredefinedFormats(), true);
+        m_sFormat.setEnabled(m_withSTime.getBooleanValue());
         addDialogComponent(sFormatComp);
         this.setHorizontalPlacement(false);
         
-      
     	
-    	ExpertConfigPanel ecPanel = new ExpertConfigPanel();
+    	// here we set another panel to set attributes for trace or events
+        createNewTab("Choose attributes set");
+        createNewGroup("Choose Columns as Trace Attributes: ");
+        m_traceAttrSet = config.getMTraceAttrSet();
+        m_traceAttrFilterComp = new DialogComponentColumnFilter(m_traceAttrSet,0, true);
+        addDialogComponent(m_traceAttrFilterComp);
+        createNewGroup("Choose Columns as Event Attributes: ");
+        m_eventAttrSet = config.getMEventAttrSet();
+        m_eventAttrFilterComp = new DialogComponentColumnFilter(m_eventAttrSet,0, true);
+        addDialogComponent(m_eventAttrFilterComp);
+
+        
+        ExpertConfigPanel ecPanel = new ExpertConfigPanel();
     	ecPanel.setConversionConfig(config);
     	addTab("Expert Choice", ecPanel);
     	
@@ -141,6 +157,9 @@ public class CSV2XLogConverterNodeDialog extends DefaultNodeSettingsPane {
     	eventIDComp.replaceListItems(m_possibleColumns, m_eventID.getStringValue());
     	sTimeComp.replaceListItems(m_possibleColumns, m_startTime.getStringValue());
     	cTimeComp.replaceListItems(m_possibleColumns, m_completeTime.getStringValue());
+    	
+    	m_traceAttrSet.setIncludeList(m_possibleColumns);
+    	m_eventAttrSet.setIncludeList(m_possibleColumns);
     	
 		try {
 			// separate reason is that I want to simplify the codes for other item;

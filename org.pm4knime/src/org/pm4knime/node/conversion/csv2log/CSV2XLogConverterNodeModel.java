@@ -44,7 +44,7 @@ public class CSV2XLogConverterNodeModel extends NodeModel {
     
 	
 	// here we have optional item, but now just this two
-	CSV2XLogConfigModel m_config =  new CSV2XLogConfigModel();
+	static CSV2XLogConfigModel m_config =  new CSV2XLogConfigModel();
 	XLogPortObject logPO;
     /**
      * Constructor for the node model.
@@ -86,6 +86,7 @@ public class CSV2XLogConverterNodeModel extends NodeModel {
     	// one thing to remember, it is not so important to have order of timestamp. 
     	ToXLogConverter handler = new ToXLogConverter();
     	handler.setConfig(m_config);
+    	
     	handler.convertCVS2Log(sortedTable);
     	XLog log = handler.getXLog();
     	logPO = new XLogPortObject(log);

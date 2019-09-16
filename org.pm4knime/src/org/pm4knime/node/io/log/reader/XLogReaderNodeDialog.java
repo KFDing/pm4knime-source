@@ -10,7 +10,7 @@ public class XLogReaderNodeDialog extends DefaultNodeSettingsPane {
 
 	public XLogReaderNodeDialog() {
 		super();
-		addDialogComponent(new DialogComponentFileChooser(sm.getFilePathSettingsModel(), "", new String[]{".xes"}));
+		addDialogComponent(new DialogComponentFileChooser(sm.getFilePathSettingsModel(), "", new String[]{".xes", ".xes.gz"}));
 	}
 
 }

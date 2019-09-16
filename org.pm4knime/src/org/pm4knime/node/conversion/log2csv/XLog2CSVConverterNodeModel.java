@@ -6,7 +6,9 @@ import java.io.IOException;
 import org.deckfour.xes.model.XLog;
 import org.knime.core.data.DataColumnSpec;
 import org.knime.core.data.DataColumnSpecCreator;
+import org.knime.core.data.DataRow;
 import org.knime.core.data.DataTableSpec;
+import org.knime.core.data.container.ColumnRearranger;
 import org.knime.core.data.def.StringCell;
 import org.knime.core.node.BufferedDataContainer;
 import org.knime.core.node.BufferedDataTable;
@@ -65,13 +67,15 @@ public class XLog2CSVConverterNodeModel extends NodeModel {
         	}
         
     	XLog log = logPortObject.getLog();
+    	// FromXLogConverter.testAttrOverlapping(log);
+    	
     	// FromXLogConverter.createSpec(log);
-    	DataTableSpec outSpec = FromXLogConverter.createSpec(log);
-		// if we want to create the column and also save the record, it is a bit hard!! 
-		BufferedDataContainer buf = exec.createDataContainer(outSpec);
-    	FromXLogConverter.convert(log, buf);
-    	buf.close();
-        return new BufferedDataTable[]{buf.getTable()};
+    	DataTableSpec outSpec = FromXLogConverter.createAttrSpec(log);
+    	BufferedDataContainer bufCon = exec.createDataContainer(outSpec);
+    	FromXLogConverter.convert(log, bufCon);
+    	
+    	bufCon.close();
+        return new BufferedDataTable[]{bufCon.getTable()};
     }
 
     /**

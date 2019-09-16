@@ -10,6 +10,7 @@ import org.knime.core.node.InvalidSettingsException;
 import org.knime.core.node.NodeSettingsRO;
 import org.knime.core.node.NodeSettingsWO;
 import org.knime.core.node.defaultnodesettings.SettingsModelBoolean;
+import org.knime.core.node.defaultnodesettings.SettingsModelFilterString;
 import org.knime.core.node.defaultnodesettings.SettingsModelString;
 import org.processmining.log.csvimport.config.CSVConversionConfig;
 import org.processmining.log.csvimport.config.CSVConversionConfig.CSVEmptyCellHandlingMode;
@@ -29,6 +30,8 @@ public class CSV2XLogConfigModel{
 	public static final String CFG_KEY_COMPLETE_TIME = "Complete Time";
 	public static final String CFG_KEY_WITH_START_TIME = "With Start Time";
 	public static final String CFG_KEY_START_TIME = "Start Time";
+	public static final String CFG_KEY_TRACE_ATTRSET = "Trace Attribute Set";
+	public static final String CFG_KEY_EVENT_ATTRSET = "Event Attribute Set";
 	
 	private SettingsModelString m_caseID = new SettingsModelString(CFG_KEY_CASEID, "CaseID");
 	private SettingsModelString m_eventID = new SettingsModelString(CFG_KEY_EVENTID, "EventID");
@@ -41,6 +44,9 @@ public class CSV2XLogConfigModel{
 	
 	private SettingsModelBoolean m_withStartTime = new SettingsModelBoolean(CFG_KEY_WITH_START_TIME, false);
 
+	private SettingsModelFilterString m_traceAttrSet = new SettingsModelFilterString(CFG_KEY_TRACE_ATTRSET, new String[]{}, new String[]{}, false );
+	private SettingsModelFilterString m_eventAttrSet = new SettingsModelFilterString(CFG_KEY_EVENT_ATTRSET, new String[]{}, new String[]{}, false );
+	
 	// for the factory, we can return the values later, but now we need to save the values here
 	private XFactory factory = XFactoryRegistry.instance().currentDefault();
 	// Various "expert" configuration options	
@@ -99,10 +105,10 @@ public class CSV2XLogConfigModel{
         formats.add("yyyy-MM-dd HH:mm:ss.S");
         formats.add("dd.MM.yyyy HH:mm:ss.S");
         formats.add("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        formats.add("yyyy-MM-dd'T'HH:mm[:ss[.SSS]]VV['['zzzz']']");
-        formats.add("yyyy-MM-dd;HH:mm:ssVV");
-        formats.add("yyyy-MM-dd'T'HH:mm:ss.SSSVV");
-        formats.add("yyyy-MM-dd'T'HH:mm:ss.SSSVV'['zzzz']'");
+        // formats.add("yyyy-MM-dd'T'HH:mm[:ss[.SSS]]VV['['zzzz']']");
+        // formats.add("yyyy-MM-dd;HH:mm:ssVV");
+        // formats.add("yyyy-MM-dd'T'HH:mm:ss.SSSVV");
+        // formats.add("yyyy-MM-dd'T'HH:mm:ss.SSSVV'['zzzz']'");
         formats.add("yyyy-MM-dd");
         formats.add("yyyy/dd/MM");
         formats.add("dd.MM.yyyy");
@@ -116,11 +122,16 @@ public class CSV2XLogConfigModel{
 	public void saveSettings(final NodeSettingsWO settings) {
 		m_caseID.saveSettingsTo(settings);
     	m_eventID.saveSettingsTo(settings);
-    	m_startTime.saveSettingsTo(settings);
+    	
     	m_completeTime.saveSettingsTo(settings);
-    	m_sFormat.saveSettingsTo(settings);
     	m_cFormat.saveSettingsTo(settings);
+    	
     	m_withStartTime.saveSettingsTo(settings);
+    	m_startTime.saveSettingsTo(settings);
+    	m_sFormat.saveSettingsTo(settings);
+    	
+    	m_traceAttrSet.saveSettingsTo(settings);
+    	m_eventAttrSet.saveSettingsTo(settings);
     	
 		settings.addString(CFG_KEY_XFACTORY, factory.getName());
 		settings.addString(CFG_KEY_ERROR_HANDLE_MODE, errorHandlingMode.name());
@@ -134,12 +145,16 @@ public class CSV2XLogConfigModel{
 		
 		m_caseID.loadSettingsFrom(settings);
     	m_eventID.loadSettingsFrom(settings);
-    	m_startTime.loadSettingsFrom(settings);
     	m_completeTime.loadSettingsFrom(settings);
-    	m_sFormat.loadSettingsFrom(settings);
     	m_cFormat.loadSettingsFrom(settings);
+    	
     	m_withStartTime.loadSettingsFrom(settings);
-		
+    	m_startTime.loadSettingsFrom(settings);
+    	m_sFormat.loadSettingsFrom(settings);
+    	
+    	m_traceAttrSet.loadSettingsFrom(settings);
+    	m_eventAttrSet.loadSettingsFrom(settings);
+    	
 		String fName = settings.getString(CFG_KEY_XFACTORY);
 		
 		Set<XFactory> fSet =  XFactoryRegistry.instance().getAvailable();
@@ -157,6 +172,7 @@ public class CSV2XLogConfigModel{
 		emptyCellHandlingMode = CSVConversionConfig.CSVEmptyCellHandlingMode.valueOf(emptyName);
 		
 	}
+	
 	public SettingsModelString getMCaseID() {
 		return m_caseID;
 	}
@@ -192,5 +208,17 @@ public class CSV2XLogConfigModel{
 	}
 	public void setMCFormat(SettingsModelString m_cFormat) {
 		this.m_cFormat = m_cFormat;
+	}
+	public SettingsModelFilterString getMTraceAttrSet() {
+		return m_traceAttrSet;
+	}
+	public void setMTraceAttrSet(SettingsModelFilterString m_traceAttrSet) {
+		this.m_traceAttrSet = m_traceAttrSet;
+	}
+	public SettingsModelFilterString getMEventAttrSet() {
+		return m_eventAttrSet;
+	}
+	public void setMEventAttrSet(SettingsModelFilterString m_eventAttrSet) {
+		this.m_eventAttrSet = m_eventAttrSet;
 	}
 }

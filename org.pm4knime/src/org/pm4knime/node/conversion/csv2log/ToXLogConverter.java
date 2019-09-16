@@ -1,14 +1,14 @@
 package org.pm4knime.node.conversion.csv2log;
 
-import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.ParsePosition;
-import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
-import java.util.regex.Pattern;
-
+import java.util.Map;
 import org.deckfour.xes.extension.XExtension;
 import org.deckfour.xes.extension.std.XConceptExtension;
 import org.deckfour.xes.extension.std.XLifecycleExtension;
@@ -28,6 +28,8 @@ import org.knime.core.data.def.BooleanCell;
 import org.knime.core.data.def.DoubleCell;
 import org.knime.core.data.def.IntCell;
 import org.knime.core.data.def.StringCell;
+import org.knime.core.data.time.localdatetime.LocalDateTimeCell;
+import org.knime.core.data.time.localdatetime.LocalDateTimeCellFactory;
 import org.knime.core.node.BufferedDataTable;
 import org.processmining.log.csvimport.config.CSVConversionConfig.CSVErrorHandlingMode;
 import org.processmining.log.utils.XUtils;
@@ -36,11 +38,10 @@ import org.processmining.log.utils.XUtils;
  * this class belongs to utility. But currently use is to create an EventLog from CSV file.
  * @author kefang-pads
  * @reference org.processmining.log.csvimport.handler.XESConversionHandlerImpl
+ * @modify reason: add trace and event attribute sets. So we can assign them in category
  */
 public class ToXLogConverter {
 
-	private static Pattern INVALID_MS_PATTERN = Pattern.compile("(:[0-5][0-9]\\.[0-9]{3})[0-9]*$");
-	
 	private XFactory factory = null;
 	
 	private XLog log = null;
@@ -51,6 +52,9 @@ public class ToXLogConverter {
 	private XEvent currentEvent = null;
 	private XEvent currentStartEvent;
 	private int instanceCounter = 0;
+	
+	// save trace attributes set
+	private Map<String, DataCell> traceAttrMap = new HashMap<String, DataCell>();
 	
 	CSV2XLogConfigModel config = null;
 	
@@ -66,40 +70,31 @@ public class ToXLogConverter {
 	 * @param logName
 	 */
 	public void convertCVS2Log(BufferedDataTable csvData) {
-		String logName = csvData.getSpec().getName();
-		startLog(logName + "event log");
-		// here we need to set the idx for the table
-//		int caseIDIdx = getColIndex(csvData, config.getMCaseID().getStringValue());
-//		int eventIDIdx = getColIndex(csvData, config.getMEventID().getStringValue());
-//		int cTimeIdx = getColIndex(csvData, config.getMCompleteTime().getStringValue());
-//		int sTimeIdx = getColIndex(csvData, config.getMStartTime().getStringValue());
+		
+		// get trace and event attribute available sets here 
+		List<String> traceColumns= config.getMTraceAttrSet().getIncludeList();
+		// find the idx for it, for once 
+		List<String> eventColumns= config.getMEventAttrSet().getIncludeList();
+		
+		int[] traceColIndices = csvData.getDataTableSpec().columnsToIndices(traceColumns.toArray(new String[0]));
+		int[] eventColIndices = csvData.getDataTableSpec().columnsToIndices(eventColumns.toArray(new String[0]));
+		boolean[] traceColVisited = new boolean[traceColIndices.length];
+		boolean[] eventColVisited = new boolean[eventColIndices.length];
 		
 		int caseIDIdx = -1, eventIDIdx = -1, cTimeIdx = -1, sTimeIdx = -1;
-		String[] colNames = csvData.getDataTableSpec().getColumnNames();
-		List<Integer> otherIndices = new ArrayList<Integer>();
-		for(int i=0; i< colNames.length; i++) {
-			if(colNames[i].equals(config.getMCaseID().getStringValue())) {
-				caseIDIdx = i;
-			}else if(colNames[i].equals(config.getMEventID().getStringValue())) {
-				eventIDIdx = i;
-			}else if(colNames[i].equals(config.getMCompleteTime().getStringValue())) {
-				cTimeIdx = i;
-				// if they both have the same column, we must assign them both
-				// with the same index
-				if(config.isShouldAddStartEventAttributes() && colNames[i].equals(config.getMStartTime().getStringValue())) {
-					sTimeIdx = i;
-				}
-			}else if(config.isShouldAddStartEventAttributes() && colNames[i].equals(config.getMStartTime().getStringValue())) {
-				sTimeIdx = i;
-				if(colNames[i].equals(config.getMCompleteTime().getStringValue())) {
-					cTimeIdx = i;
-				}
-			}else {
-				otherIndices.add(i);
-			} 
-		}
 		
-		int currentCaseID = -1, newCaseID;
+		caseIDIdx = traceColumns.indexOf(config.getMCaseID().getStringValue());
+		eventIDIdx = eventColumns.indexOf(config.getMEventID().getStringValue());
+		cTimeIdx = eventColumns.indexOf(config.getMCompleteTime().getStringValue());
+		
+		traceColVisited[caseIDIdx] = true;
+		eventColVisited[eventIDIdx] =true;
+		eventColVisited[cTimeIdx] =true;
+		if(config.isShouldAddStartEventAttributes()) {
+			sTimeIdx = eventColumns.indexOf(config.getMCompleteTime().getStringValue());
+			eventColVisited[sTimeIdx] = true;
+		}
+		String currentCaseID = "-1", newCaseID="";
 		
 		String cFormat = config.getMCFormat().getStringValue();
 		String sFormat = null;
@@ -107,23 +102,45 @@ public class ToXLogConverter {
 			sFormat = config.getMSFormat().getStringValue();
 		
 		
+		String logName = csvData.getSpec().getName();
+		startLog(logName + "event log");
+		
 		for(DataRow row : csvData) {
-			newCaseID = ((IntCell) row.getCell(caseIDIdx)).getIntValue();
+			// when it is a integer or string, not matter, right?? 
+			DataCell traceIDData = row.getCell(traceColIndices[caseIDIdx]);
 			
-			if(newCaseID != currentCaseID) {
+			newCaseID = traceIDData.toString();
+			
+			if(!newCaseID.equals(currentCaseID)) {
 				// we meet a new trace, end old one and begin new one
-				if(currentCaseID!=-1)
-					endTrace(currentCaseID + ""); // make it as a string
+				if(!currentCaseID.equals("-1"))
+					endTrace(currentCaseID); // make it as a string
 				
 				currentCaseID = newCaseID;
-
-				startTrace(currentCaseID + "");
+				startTrace(currentCaseID);
 			}
 			
-			// deal with new event class, it can be in discrete value, 
-			// but as ID, we assume it in dicrete value
+			// get trace attributes 
+			
+			for(int tIdx = 0; tIdx< traceColIndices.length ; tIdx++) {
+				if(traceColVisited[tIdx])
+					continue; 
+				if(traceAttrMap.containsKey(traceColumns.get(traceColIndices[tIdx]))) {
+					// if contains value, compare if they are same 
+					if(!traceAttrMap.get(traceColumns.get(tIdx)).equals(row.getCell(traceColIndices[tIdx]))) {
+						System.out.println("Error happens with the trace Attributes here");
+						errorDetected = true;
+						break;
+					}
+				}else {
+					// for the values there, we deal with it later 
+					traceAttrMap.put(traceColumns.get(tIdx), row.getCell(traceColIndices[tIdx]));
+				}
+			}
+
+			// deal with new event class, it can be in discrete value
 			String eventClass = null;
-			DataCell eventIDData = row.getCell(eventIDIdx);
+			DataCell eventIDData = row.getCell(eventColIndices[eventIDIdx]);
 			if(eventIDData.getType().equals(IntCell.TYPE)) {
 				eventClass = ((IntCell)eventIDData).getIntValue() + "";
 			}else if(eventIDData.getType().equals(StringCell.TYPE)) {
@@ -135,11 +152,15 @@ public class ToXLogConverter {
 			
 			// if we don't use the original convertion in knime, it should work
 			try {
-				String cTime = ((StringCell) row.getCell(cTimeIdx)).getStringValue();
+				// if the values there are also like this, what to do?? 
+				// String cTime = ((StringCell) row.getCell(eventColIndices[cTimeIdx])).getStringValue();
+				String cTime = row.getCell(eventColIndices[cTimeIdx]).toString();
 				Date cTimeDate = convertString2Date(cFormat, cTime);
 				Date sTimeDate = null;
 				if(config.isShouldAddStartEventAttributes()) {
-					String sTime = ((StringCell) row.getCell(sTimeIdx)).getStringValue();// need to make sure the format same??
+					sTimeIdx = eventColumns.indexOf(config.getMCompleteTime().getStringValue());
+					// String sTime = ((StringCell) row.getCell(eventColIndices[sTimeIdx])).getStringValue();// need to make sure the format same??
+					String sTime = row.getCell(eventColIndices[sTimeIdx]).toString();
 					sTimeDate = convertString2Date(sFormat, sTime);
 				}
 				startEvent(eventClass, cTimeDate, sTimeDate);
@@ -151,32 +172,13 @@ public class ToXLogConverter {
 			
 			// after this, we process other attributes, like resource, costs;; At this point, we need to differ their types 
 			// and add attributes to the currentEventClass...
-			// we have a list of colIdx to be checked
-			for(int otherIdx: otherIndices) {
-				DataCell otherData = row.getCell(otherIdx);
-				
-				if(otherData.getType().equals(IntCell.TYPE)){
-					IntCell iCell = (IntCell) otherData;
-					// here we set extension as null, but later we should improve it
-					assignAttribute(currentEvent, factory.createAttributeDiscrete(colNames[otherIdx] ,iCell.getIntValue(), null));
-				
-				}else if(otherData.getType().equals(DoubleCell.TYPE)){
-					DoubleCell dCell = (DoubleCell) otherData;
-					// here we set extension as null, but later we should improve it
-					assignAttribute(currentEvent, factory.createAttributeContinuous(colNames[otherIdx] ,dCell.getDoubleValue(), null));
-				
-				}else if(otherData.getType().equals(StringCell.TYPE)){
-					StringCell sCell = (StringCell) otherData;
-					// here we set extension as null, but later we should improve it
-					assignAttribute(currentEvent, factory.createAttributeLiteral(colNames[otherIdx] ,sCell.getStringValue(), null));
-				
-				}else if(otherData.getType().equals(BooleanCell.TYPE)){
-					BooleanCell bCell = (BooleanCell) otherData;
-					// here we set extension as null, but later we should improve it
-					assignAttribute(currentEvent, factory.createAttributeBoolean(colNames[otherIdx] ,bCell.getBooleanValue(), null));
-				}
-				// here could be DateTime type, but how to say it ??
-				
+			for(int eIdx =0; eIdx< eventColIndices.length; eIdx++) {
+				if(eventColVisited[eIdx])
+					continue;
+
+				DataCell otherData = row.getCell(eventColIndices[eIdx]);
+				String attrName = eventColumns.get(eIdx);
+				assignAttributeWithDataCell(currentEvent, otherData, attrName);
 			}
 			
 			endEvent();
@@ -185,16 +187,49 @@ public class ToXLogConverter {
 		endTrace(currentCaseID + "");	
 	}
 	
+	private void assignAttributeWithDataCell(XAttributable currentObj,DataCell otherData, String attrName) {
+		
+		if(otherData.getType().equals(IntCell.TYPE)){
+			IntCell iCell = (IntCell) otherData;
+			// here we set extension as null, but later we should improve it
+			assignAttribute(currentObj, factory.createAttributeDiscrete(attrName, iCell.getIntValue(), null));
+		
+		}else if(otherData.getType().equals(DoubleCell.TYPE)){
+			DoubleCell dCell = (DoubleCell) otherData;
+			// here we set extension as null, but later we should improve it
+			assignAttribute(currentObj, factory.createAttributeContinuous(attrName ,dCell.getDoubleValue(), null));
+		
+		}else if(otherData.getType().equals(StringCell.TYPE)){
+			StringCell sCell = (StringCell) otherData;
+			// here we set extension as null, but later we should improve it
+			assignAttribute(currentObj, factory.createAttributeLiteral(attrName ,sCell.getStringValue(), null));
+		
+		}else if(otherData.getType().equals(BooleanCell.TYPE)){
+			BooleanCell bCell = (BooleanCell) otherData;
+			// here we set extension as null, but later we should improve it
+			assignAttribute(currentObj, factory.createAttributeBoolean(attrName ,bCell.getBooleanValue(), null));
+		}else if(otherData.getType().equals(LocalDateTimeCellFactory.TYPE)){
+			LocalDateTimeCell tCell = (LocalDateTimeCell) otherData;
+			LocalDateTime ldt = tCell.getLocalDateTime();
+			Date date = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+			assignAttribute(currentObj, factory.createAttributeTimestamp(attrName, date, null));
+		}else if(otherData.isMissing()) {
+			// System.out.println("Missing values to attribute " + attrName); // but still we can assign it there to show missing
+			assignAttribute(currentObj, factory.createAttributeLiteral(attrName ,otherData.toString(), null));
+			
+		}else {
+			System.out.println("Unknown data type");
+		}
+		// here could be DateTime type, but how to say it ??
+		
+	}
+	
 	/*
 	 * create a log file w.r.t. DataTable input here
 	 */
 	public void startLog(String logName) {
 		log = factory.createLog();
-		// create attribute related to log
-		// add name to log
-		// String name = "temp name";
-		// XAttribute nameAttr = factory.createAttributeLiteral(XConceptExtension.KEY_NAME, name, XConceptExtension.instance());
-		// XUtils.putAttribute(log, nameAttr);
+		
 		assignName(factory, log, logName);
 		// assign EventName Classifier to log
 		log.getExtensions().add(XConceptExtension.instance());
@@ -206,24 +241,24 @@ public class ToXLogConverter {
 		log.getClassifiers().add(XUtils.STANDARDCLASSIFIER);
 		
 		// add other extensions for each column here
-		// for organization
+		// for organization 
 		XExtension orgExt =XOrganizationalExtension.instance();	
 		log.getExtensions().add(orgExt);
-		// for cost?
 		
 	}
 	
 	public void startTrace(String caseId) {
 		currentEvents.clear();
+		// clear map and begin a new one
+		traceAttrMap.clear();
 		errorDetected = false;
 		currentTrace = factory.createTrace();
-		// what if sth attributes are trace attributes?? how to classify this stuff??
-		// it will totally different, if we have set some values there as the trace attributes;
-		// we will assign attributes to trace, but also to global attributes there
-		// we need to do it there
+		
 		assignName(factory, currentTrace, caseId);
 	}
 
+	
+	
 	public void endTrace(String caseId) {
 		if (errorDetected && config.getErrorHandlingMode() == CSVErrorHandlingMode.OMIT_TRACE_ON_ERROR) {
 			// Skip the entire trace
@@ -231,6 +266,12 @@ public class ToXLogConverter {
 		}
 		
 		currentTrace.addAll(currentEvents);
+		// add trace attribute to currentTrace 
+		for(String attrKey : traceAttrMap.keySet()) {
+			DataCell data = traceAttrMap.get(attrKey);
+			assignAttributeWithDataCell(currentTrace, data, attrKey);
+		}
+		
 		log.add(currentTrace);
 	}
 	
@@ -296,6 +337,7 @@ public class ToXLogConverter {
 		}
 		currentEvents.add(currentEvent);
 		currentEvent = null;
+		
 	}
 	
 	
@@ -327,40 +369,15 @@ public class ToXLogConverter {
 				factory.createAttributeLiteral(XConceptExtension.KEY_NAME, value, XConceptExtension.instance()));
 	}
 	
-	// convert string to DateTime there
+	// convert string to DateTime there, one easy solution is to delete the zone in data and time
 	public Date convertString2Date(String format, String value) throws ParseException {
-		DateFormat customDateFormat = new SimpleDateFormat(format); 
+		// we need the predefined format in knime 
 		
-		if (value == null) {
-			throw new ParseException("Could not parse NULL timestamp!", 0);
-		}
-
-		if (customDateFormat != null) {
-			ParsePosition pos = new ParsePosition(0);
-			Date date = customDateFormat.parse(value, pos);
-			
-			// Fix if there are more than 3 digits for ms for example 44.00.540000, do not return and
-			// ensure string is formatted to 540 ms instead of 540000 ms
-			if (date != null && !INVALID_MS_PATTERN.matcher(value).find()) {
-				return date;
-			} else {
-				String fixedValue = INVALID_MS_PATTERN.matcher(value).replaceFirst("$1");
-				pos.setIndex(0);
-				date = customDateFormat.parse(fixedValue, pos);
-				if (date != null) {
-					return date;
-				} else {
-					String pattern = "unkown";
-					if (customDateFormat instanceof SimpleDateFormat) {
-						pattern = ((SimpleDateFormat) customDateFormat).toPattern();
-					}
-					throw new ParseException("Could not parse " + value + " using pattern '" + pattern + "'",
-							pos.getErrorIndex());
-				}
-			}
-		}else
-			throw new ParseException("Could not parse " + value, -1);
-        
+		DateTimeFormatter df = DateTimeFormatter.ofPattern(format);
+		LocalDateTime ldt = LocalDateTime.parse(value, df);
+		Date date = Date.from(ldt.atZone(ZoneId.systemDefault()).toInstant());
+		return date;
+		// return Instant.parse(value).toDate();
 	}
 	
 }

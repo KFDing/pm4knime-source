@@ -349,7 +349,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 		
 	}
     
-    private Transition findTransition(String transitionName, Collection<Transition> tCol) {
+    static Transition findTransition(String transitionName, Collection<Transition> tCol) {
 		// TODO given transition name, we can find the transition in net
     	
     	for(Transition t: tCol) {
@@ -361,7 +361,7 @@ public class ConformanceCheckerNodeModel extends NodeModel implements XEventClas
 		return null;
 	}
 
-	private XEventClass findEventClass(String eventName, Collection<XEventClass> eventClasses) {
+	static XEventClass findEventClass(String eventName, Collection<XEventClass> eventClasses) {
 		// TODO Auto-generated method stub
 		for(XEventClass eClass : eventClasses) {
 			if(eventName.equals(eClass.getId()))
